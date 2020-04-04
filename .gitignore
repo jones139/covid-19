@@ -1,0 +1,4 @@
+*.py~
+*.pyc
+data
+latestData.xlsx

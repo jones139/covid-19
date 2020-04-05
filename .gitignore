@@ -2,3 +2,5 @@
 *.pyc
 data
 latestData.xlsx
+populations.xlsx
+chart*.png

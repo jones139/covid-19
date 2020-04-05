@@ -14,13 +14,14 @@
       Estimates published by the
       <a href="https://www.ons.gov.uk/peoplepopulationandcommunity/populationandmigration/populationestimates/datasets/populationestimatesforukenglandandwalesscotlandandnorthernireland">
 	Office for National Statistics</a>.</p>
+    <h3>Remember Folks - Never make a judgement that relies on the last data point in a time series!</h3>
     <p>The data is processed using the
       <a href="https://pandas.pydata.org/">Pandas</a> data analysis library
       using the scipts published
       <a href="https://github.com/jones139/covid-19">here</a>.
       It should be updated every day automatically (if I have programmed my
       computer correctly.....)
-      For any queries please email grahamjones139@gmail.com</p>
+      For any queries please email graham@openseizuredetector.org.uk</p>
     <img src="chart1.png"/>
     <img src="chart2.png"/>
     <p>This page was generated at {{ data.pageDateStr }}.

@@ -45,8 +45,8 @@ if (__name__ == "__main__"):
 
     # Get the most recent data, and filter it to only view the
     # corrected values for each authority.
-    dfCurrent = df.iloc[-1,:]
-    print(dfCurrent.sort_values().filter(like='_corr', axis=0))
+    #dfCurrent = df.iloc[-1,:]
+    #print(dfCurrent.sort_values().filter(like='_corr', axis=0))
 
 
     env = jinja2.Environment(

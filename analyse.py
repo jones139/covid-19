@@ -25,18 +25,14 @@ def getLegendLst(authLst):
 
 def plotAuthorityData(df,authLst,chartFname="chart.png"):
     """ Plots a graph of the data in df for authority authName """
-    #print("plotAuthorityData(%s)" % authLst)
     ax = df.plot(y=authLst, grid=True, title="Confirmed Cases - Raw Data")
     legendLst = getLegendLst(authLst)
     ax.legend(legendLst)
     ax.figure.savefig(chartFname)
 
 def plotNormalisedAuthorityData(df, authLst, chartFname="chart2.png"):
-    #print(df.describe(),df.dtypes,df.head())
     seriesLst = []
-    legendLst = []
     dfPop = loadPopulationData()
-    #print(dfPop.head())
     for auth in authLst:
         seriesLst.append("%s_corr" % auth)
 
@@ -58,7 +54,6 @@ def loadFile(fname):
     """
     print("loadFile(%s)" % fname)
     df = pd.read_excel(fname, sheet_name='UTLAs', header=7)
-    #latestDate=(df.iloc[-1][0]).date()
     df=df.drop(columns=["Area Name",
     #                    "NHS region",
     #                    "Region (Government) "
@@ -72,26 +67,14 @@ def loadFile(fname):
     dfPop = loadPopulationData()
     # Convert datatypes from 'object' to numeric values.
     for auth in dft.columns:
-        #dft[auth] = pd.to_numeric(dft[auth])
         pop = dfPop.query('Code=="%s"' % auth)['All ages']
-        #print("Auth=%s, pop=%.0f," % (auth,pop))
         corr = float(100000./pop)
-        #print("Auth=%s, pop=%.0f, corr=%f" % (auth,pop,corr))
-        #print(df[auth])
         dft['%s_corr' % auth] = dft[auth]*corr #.multiply(corr)
     
-    #print(dft.head())
-    #print(dft.describe())
-
-    
-
-
     return dft
 
 def loadPopulationData():
     df = pd.read_excel("populations.xlsx", sheet_name='MYE2-All', header=4)
-    #latestDate=(df.iloc[-1][0]).date()
-    #df=df.drop(columns=["Code"])
     return df[['Code','Name','All ages']]
     
 
@@ -110,8 +93,6 @@ if (__name__ == "__main__"):
     print("inFname=%s" % inFname)
 
     df=loadFile(inFname)
-
-    #print(df)
 
     plotAuthorityData(df,authoritiesLst)
     plotNormalisedAuthorityData(df,authoritiesLst)

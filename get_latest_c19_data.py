@@ -28,14 +28,17 @@ latestDate=(df.iloc[-1][0]).date()
 
 fname = "Dashboard_Data_%s.xlsx" % latestDate.isoformat()
 filePath = os.path.join(dataDir,fname)
-print("Saving file to %s" % filePath)
-open(filePath, 'wb').write(fileData.content)
+print("this file name is %s" % fname)
+if (not os.path.exists(filePath)):
+    print("Saving file to %s" % filePath)
+    open(filePath, 'wb').write(fileData.content)
 
-if (os.path.exists(symlinkFname)):
-    print("removing pre-existing symlink to latest data")
-    os.remove(symlinkFname)
-print("Creating symlink to latest data as %s" % symlinkFname)
-os.symlink(filePath, symlinkFname)
-
+    if (os.path.exists(symlinkFname)):
+        print("removing pre-existing symlink to latest data")
+        os.remove(symlinkFname)
+    print("Creating symlink to latest data as %s" % symlinkFname)
+    os.symlink(filePath, symlinkFname)
+else:
+    print("File aleady exists, not doing anything.")
 print("done!")
 

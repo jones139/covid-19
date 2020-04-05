@@ -59,7 +59,10 @@ def loadFile(fname):
     print("loadFile(%s)" % fname)
     df = pd.read_excel(fname, sheet_name='UTLAs', header=7)
     #latestDate=(df.iloc[-1][0]).date()
-    df=df.drop(columns=["Area Name","NHS region", "Region (Governement) "])
+    df=df.drop(columns=["Area Name",
+    #                    "NHS region",
+    #                    "Region (Government) "
+    ])
     colNames = list(df.iloc[:,0]) # Authority Codes
     dft = df.transpose()
     dft.columns = colNames
@@ -113,3 +116,11 @@ if (__name__ == "__main__"):
     plotAuthorityData(df,authoritiesLst)
     plotNormalisedAuthorityData(df,authoritiesLst)
     #plotFit(df,"Hartlepool")
+
+
+    # Get the most recent data, and filter it to only view the
+    # corrected values for each authority.
+    dfCurrent = df.iloc[-1,:]
+    print(dfCurrent.sort_values().filter(like='_corr', axis=0))
+
+    

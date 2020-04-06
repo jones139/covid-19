@@ -33,7 +33,7 @@ def plotAuthorityData(df,authLst,chartFname="chart1.png"):
     df.plot(ax=axes[0],
             y=authLst,
             grid=True,
-            title="Confirmed Cases - Raw Data")
+            title="Confirmed Cases\nRaw Data")
     dfDiff = df.diff(axis=0)
     dfDiff.plot(y=authLst, grid=True, ax=axes[1])
     legendLst = getLegendLst(authLst)
@@ -55,7 +55,7 @@ def plotNormalisedAuthorityData(df, authLst, chartFname="chart2.png"):
     df.plot(ax=axes[0],
             y=seriesLst,
             grid=True,
-            title="Confirmed Cases - Corrected Data\n(cases per 100k population)")
+            title="Confirmed Cases\nCorrected Data (cases per 100k population)")
     dfDiff = df.diff(axis=0)
     dfDiff.plot(y=seriesLst, grid=True, ax=axes[1])
 

@@ -13,6 +13,8 @@ authoritiesLst = [
     "E06000004", #"Stockton-on-Tees",
     "E06000005", #"Darlington",
     "E06000047", #"County Durham",
+    "E08000024", # Sunderland
+    #"E09000022", # Lambeth (for comparison)
     #"Bournemouth, Christchurch and Poole"
 ]
 

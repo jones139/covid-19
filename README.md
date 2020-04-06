@@ -18,3 +18,10 @@ Current functionality is:
   
 Any comments please email grahamjones139@gmail.com
 
+
+Dependencies
+------------
+The following python libraries are used:
+  * pandas for data analysis
+  * jinja2 to generate html from templates
+  * requests to download data

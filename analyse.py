@@ -2,6 +2,7 @@
 import argparse
 import pandas as pd
 import matplotlib
+import matplotlib.pyplot as plt
 matplotlib.use('agg')
 
 latestDataFname = "latestData.xlsx"
@@ -26,23 +27,45 @@ def getLegendLst(authLst):
         legendLst.append(authName)
     return legendLst
 
-def plotAuthorityData(df,authLst,chartFname="chart.png"):
+def plotAuthorityData(df,authLst,chartFname="chart1.png"):
     """ Plots a graph of the data in df for authority authName """
-    ax = df.plot(y=authLst, grid=True, title="Confirmed Cases - Raw Data")
+    fig, axes = plt.subplots(nrows=2, ncols=1,figsize=(5,8))
+    df.plot(ax=axes[0],
+            y=authLst,
+            grid=True,
+            title="Confirmed Cases - Raw Data")
+    dfDiff = df.diff(axis=0)
+    dfDiff.plot(y=authLst, grid=True, ax=axes[1])
     legendLst = getLegendLst(authLst)
-    ax.legend(legendLst)
-    ax.figure.savefig(chartFname)
+    axes[0].legend(legendLst)
+    axes[0].set_ylabel("Cumulative Cases")
+    axes[1].legend(legendLst)
+    axes[1].set_ylabel("Cases per Day")
+    plt.tight_layout()
+    fig.savefig(chartFname)
+
 
 def plotNormalisedAuthorityData(df, authLst, chartFname="chart2.png"):
     seriesLst = []
     dfPop = loadPopulationData()
     for auth in authLst:
         seriesLst.append("%s_corr" % auth)
+    fig, axes = plt.subplots(nrows=2, ncols=1,figsize=(5,8))
 
-    ax = df.plot(y=seriesLst, grid=True, title="Confirmed Cases - Corrected Data (cases per 100k population)")
+    df.plot(ax=axes[0],
+            y=seriesLst,
+            grid=True,
+            title="Confirmed Cases - Corrected Data\n(cases per 100k population)")
+    dfDiff = df.diff(axis=0)
+    dfDiff.plot(y=seriesLst, grid=True, ax=axes[1])
+
     legendLst = getLegendLst(authLst)
-    ax.legend(legendLst)
-    ax.figure.savefig(chartFname)
+    axes[0].legend(legendLst)
+    axes[0].set_ylabel("Cumulative Cases")
+    axes[1].legend(legendLst)
+    axes[1].set_ylabel("Cases per Day")
+    plt.tight_layout()
+    fig.savefig(chartFname)
 
 
 def plotFit(df,authName, chartFname="chart3.png"):

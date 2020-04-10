@@ -2,8 +2,8 @@
 import argparse
 import pandas as pd
 import matplotlib
-import matplotlib.pyplot as plt
 matplotlib.use('agg')
+import matplotlib.pyplot as plt
 
 latestDataFname = "latestData.xlsx"
 
@@ -15,7 +15,7 @@ authoritiesLst = [
     "E06000005", #"Darlington",
     "E06000047", #"County Durham",
     "E08000024", # Sunderland
-    #"E09000022", # Lambeth (for comparison)
+    "E09000022", # Lambeth (for comparison)
     #"Bournemouth, Christchurch and Poole"
 ]
 
@@ -27,29 +27,47 @@ def getLegendLst(authLst):
         legendLst.append(authName)
     return legendLst
 
-def plotAuthorityData(df,authLst,chartFname="chart1.png"):
-    """ Plots a graph of the data in df for authority authName """
+def plotAuthorityData(df,authLst,chartFname="chart1.png",
+                      rolling_window='5d'):
+    """ Plots a graph of the data in df for authority authName 
+    Plots a rolling average of the actual data as a line.  Default width
+       of rolling average window is 1 day, which amounts to the raw data."""
     fig, axes = plt.subplots(nrows=2, ncols=1,figsize=(5,8))
+    dfRoll = df.rolling(rolling_window).mean()
+    print(df.filter(authLst).tail(),dfRoll.filter(authLst).tail())
     df.plot(ax=axes[0],
+            #style=".",        
             y=authLst,
+            #marker="+",
             grid=True,
             title="Confirmed Cases\nRaw Data")
+    dfRoll.plot(ax=axes[0], y=authLst)
     dfDiff = df.diff(axis=0)
-    dfDiff.plot(y=authLst, grid=True, ax=axes[1])
+    dfDiffRoll = dfDiff.rolling(rolling_window).mean()
+    dfDiff.plot(y=authLst,
+                grid=True,
+                ax=axes[1],
+                marker="+",
+                style="."
+    )
+    axes[1].set_prop_cycle(None)
+    dfDiffRoll.plot(ax=axes[1], y=authLst)
     legendLst = getLegendLst(authLst)
     axes[0].legend(legendLst)
     axes[0].set_ylabel("Cumulative Cases")
     axes[1].legend(legendLst)
-    axes[1].set_ylabel("Cases per Day")
+    axes[1].set_ylabel("Cases per Day\n(with %s rolling average)" % rolling_window)
     plt.tight_layout()
     fig.savefig(chartFname)
 
 
-def plotNormalisedAuthorityData(df, authLst, chartFname="chart2.png"):
+def plotNormalisedAuthorityData(df, authLst, chartFname="chart2.png",
+                                rolling_window='5d'):
     seriesLst = []
     dfPop = loadPopulationData()
     for auth in authLst:
         seriesLst.append("%s_corr" % auth)
+    dfRoll = df.rolling(rolling_window).mean()
     fig, axes = plt.subplots(nrows=2, ncols=1,figsize=(5,8))
 
     df.plot(ax=axes[0],
@@ -57,13 +75,16 @@ def plotNormalisedAuthorityData(df, authLst, chartFname="chart2.png"):
             grid=True,
             title="Confirmed Cases\nCorrected Data (cases per 100k population)")
     dfDiff = df.diff(axis=0)
-    dfDiff.plot(y=seriesLst, grid=True, ax=axes[1])
+    dfDiffRoll = dfDiff.rolling(rolling_window).mean()
+    dfDiff.plot(y=seriesLst, grid=True, ax=axes[1], marker="+", style=".")
+    axes[1].set_prop_cycle(None)
+    dfDiffRoll.plot(ax=axes[1], y=seriesLst)
 
     legendLst = getLegendLst(authLst)
     axes[0].legend(legendLst)
     axes[0].set_ylabel("Cumulative Cases")
     axes[1].legend(legendLst)
-    axes[1].set_ylabel("Cases per Day")
+    axes[1].set_ylabel("Cases per Day\n(with %s rolling average)" % rolling_window)
     plt.tight_layout()
     fig.savefig(chartFname)
 
@@ -96,7 +117,9 @@ def loadFile(fname):
         pop = dfPop.query('Code=="%s"' % auth)['All ages']
         corr = float(100000./pop)
         dft['%s_corr' % auth] = dft[auth]*corr #.multiply(corr)
-    
+
+    # Convert index from object to datetime
+    dft.index = pd.to_datetime(dft.index)
     return dft
 
 def loadPopulationData():

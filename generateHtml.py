@@ -17,6 +17,8 @@ if (__name__ == "__main__"):
     parser = argparse.ArgumentParser(description='generateHtml')
     parser.add_argument('--inFile', default="latestData.xlsx",
                         help='input filename')
+    parser.add_argument('--window', default="5d",
+                        help='Window width for rolling average lines')
     parser.add_argument('--noDownload', dest='noDownload', action='store_true',
                         help="Do not download the latest data")
     parser.add_argument('--noUpload', dest='noUpload', action='store_true',
@@ -25,6 +27,7 @@ if (__name__ == "__main__"):
     args = vars(argsNamespace)
     print(args)
     inFname = args['inFile']
+    windowStr = args['window']
 
     if (not args['noDownload']):
         print("Downloading Latest Data")
@@ -37,9 +40,13 @@ if (__name__ == "__main__"):
     dataDateStr=str((df.index[-1]).date())
 
     analyse.plotAuthorityData(df,analyse.authoritiesLst,
-                              chartFname="www/chart1.png")
+                              chartFname="www/chart1.png",
+                              rolling_window = windowStr
+    )
     analyse.plotNormalisedAuthorityData(df,analyse.authoritiesLst,
-                                        chartFname="www/chart2.png")
+                                        chartFname="www/chart2.png",
+                                        rolling_window = windowStr
+    )
     #plotFit(df,"Hartlepool")
 
 

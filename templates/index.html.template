@@ -4,16 +4,16 @@
   </head>
   <body>
     <h1>Teesside COVID-19 Tracker</h1>
-    <p>The charts below show the data published by <a href="https://www.arcgis.com/apps/opsdashboard/index.html#/ae5dda8f86814ae99dde905d2a9070ae">Public Health England</a> for individual local authority areas around Teesside.</p>
-    <p>The first chart is just a representation of the historical data
+    <p>The charts below show the data published by <a href="https://www.arcgis.com/apps/opsdashboard/index.html#/ae5dda8f86814ae99dde905d2a9070ae">Public Health England</a> for individual local authority areas around Teesside.   We also include data for Lambeth as a comparison with a typical inner London authority to compare the progress of the epidemic in the North East compared to London</p>
+    <p>The <a href="#rawDataChart">first set of three charts</a> is just a representation of the historical data
       available on the Public Health England dashboard (their dashboard only
-      shows a table, not a graph)</p>
-    <p>The second chart shows the data corrected for the population of the
+      shows a table, not a graph).  It shows the cuumulative cases, the calculated cases per day, and a rolling average of the cases per day data (To smooth out the noise)</p>
+    <p>The <a href="#normalisedDataChart">second set of three charts</a> show the data corrected for the population of the
       local authority areas to give a better comparison of the density of
       infections.   The population data is obtained from the Mid Year
       Estimates published by the
       <a href="https://www.ons.gov.uk/peoplepopulationandcommunity/populationandmigration/populationestimates/datasets/populationestimatesforukenglandandwalesscotlandandnorthernireland">
-	Office for National Statistics</a>.</p>
+	Office for National Statistics</a>.  The charts are the same as for the raw data ones.</p>
     <h3>Remember Folks - Never make a judgement that relies on the last data point in a time series!</h3>
     <p>The data is processed using the
       <a href="https://pandas.pydata.org/">Pandas</a> data analysis library
@@ -22,7 +22,9 @@
       It should be updated every day automatically (if I have programmed my
       computer correctly.....)
       For any queries please email graham@openseizuredetector.org.uk</p>
+    <h3 id="rawDataChart">Raw Data</h3>
     <img src="chart1.png"/>
+    <h3 id="normalisedDataChart">Normalised Data</h3>
     <img src="chart2.png"/>
     <p>This page was generated at {{ data.pageDateStr }}.
       The latest data is from {{ data.dataDateStr }}.

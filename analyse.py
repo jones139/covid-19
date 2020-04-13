@@ -46,11 +46,12 @@ def plotAuthorityData(df,authLst,chartFname="chart1.png",
     dfDiff.plot(y=authLst,
                 grid=True,
                 ax=axes[1],
-                title="%s Rolling Average Confirmed Cases Per Day\nRaw Data" % rolling_window
+                title="Confirmed Cases Per Day\nRaw Data"
+
     )    
 
     dfDiffRoll.plot(ax=axes[2], y=authLst,
-                    title="Confirmed Cases Per Day\n(%s Rolling Average)" % rolling_window
+                    title="%s Rolling Average Confirmed Cases Per Day\nRaw Data" % rolling_window
 )
     axes[2].set_prop_cycle(None)
     #dfDiff.plot(y=authLst,

@@ -66,7 +66,7 @@ if (__name__ == "__main__"):
     outfile = open(os.path.join(os.path.dirname(__file__),'www/index.html'),
                    'w')
     outfile.write(template.render(data={
-        'pageDateStr' : datetime.datetime.now(),
+        'pageDateStr' : (datetime.datetime.now()).strftime("%Y-%m-%d %H:%M"),
         'dataDateStr' : dataDateStr
     }))
     outfile.close()

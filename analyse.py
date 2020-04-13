@@ -41,7 +41,7 @@ def plotAuthorityData(df,authLst,chartFname="chart1.png",
             #marker="+",
             grid=True,
             title="Confirmed Cases\nRaw Data")
-    dfRoll.plot(ax=axes[0], y=authLst)
+    #dfRoll.plot(ax=axes[0], y=authLst)
     dfDiff = df.diff(axis=0)
     dfDiffRoll = dfDiff.rolling(rolling_window).mean()
     dfDiff.plot(y=authLst,

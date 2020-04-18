@@ -17,7 +17,7 @@ if (__name__ == "__main__"):
     parser = argparse.ArgumentParser(description='generateHtml')
     parser.add_argument('--inFile', default="data/coronavirus-cases.csv",
                         help='input filename')
-    parser.add_argument('--window', default="5d",
+    parser.add_argument('--window', default="7d",
                         help='Window width for rolling average lines')
     parser.add_argument('--noDownload', dest='noDownload', action='store_true',
                         help="Do not download the latest data")

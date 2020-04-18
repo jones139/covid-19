@@ -35,7 +35,8 @@ def downloadLatestData2(
 ):
     deathsFname = "coronavirus-deaths.csv"
     casesFname = "coronavirus-cases.csv"
-    downloadPath = "~/Downloads"
+    #downloadPath = "~/Downloads"
+    downloadPath = "."  # Headless chrome downloads to working directory
 
     # If the files already exist in the downloads folder, delete them
     casesPath = os.path.expanduser(os.path.join(downloadPath,casesFname))
@@ -46,7 +47,10 @@ def downloadLatestData2(
         os.remove(deathsPath)
     
     # Use a web browser to render the page.
-    browser = webdriver.Chrome("/usr/lib/chromium-browser/chromedriver")
+    chrome_options = webdriver.chrome.options.Options()
+    chrome_options.add_argument("--headless")
+    browser = webdriver.Chrome("/usr/lib/chromium-browser/chromedriver",
+                               chrome_options=chrome_options)
     browser.get(urlStr)
     # give the page chance to finish downloading ajax bits
     time.sleep(2)
@@ -70,12 +74,12 @@ def downloadLatestData2(
     print("Waiting for %s to download..." % casesPath)
     while not os.path.exists(casesPath):
         time.sleep(0.2)
-        sys.stdout.write(".")
+        sys.stderr.write(".")
     sys.stdout.write("\nDownload Complete\n")
     print("Waiting for %s to download..." % deathsPath)
     while not os.path.exists(deathsPath):
         time.sleep(0.2)
-        sys.stdout.write(".")
+        sys.stderr.write(".")
     sys.stdout.write("\nDownload Complete\n")
 
     # Copy to data directory

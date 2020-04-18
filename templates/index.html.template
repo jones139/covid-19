@@ -15,6 +15,7 @@
       <a href="https://www.ons.gov.uk/peoplepopulationandcommunity/populationandmigration/populationestimates/datasets/populationestimatesforukenglandandwalesscotlandandnorthernireland">
 	Office for National Statistics</a>.  The charts are the same as for the raw data ones.</p>
     <h3>Remember Folks - Never make a judgement that relies on the last data point in a time series!</h3>
+    <p>This is especially true since the data format was changed around 15 April 2020 as the last day's data always seems to be incomplete </p>
     <p>The data is processed using the
       <a href="https://pandas.pydata.org/">Pandas</a> data analysis library
       using the scipts published

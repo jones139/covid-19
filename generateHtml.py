@@ -15,7 +15,7 @@ import analyse
 if (__name__ == "__main__"):
     print("html.main()")
     parser = argparse.ArgumentParser(description='generateHtml')
-    parser.add_argument('--inFile', default="latestData.xlsx",
+    parser.add_argument('--inFile', default="data/coronavirus-cases.csv",
                         help='input filename')
     parser.add_argument('--window', default="5d",
                         help='Window width for rolling average lines')
@@ -31,12 +31,12 @@ if (__name__ == "__main__"):
 
     if (not args['noDownload']):
         print("Downloading Latest Data")
-        download.downloadLatestData()
+        download.downloadLatestData2()
     else:
         print("Not downloading data - attempting to use local data instead")
 
 
-    df=analyse.loadFile(inFname)
+    df=analyse.loadFile2(inFname)
     dataDateStr=str((df.index[-1]).date())
 
     analyse.plotAuthorityData(df,analyse.authoritiesLst,

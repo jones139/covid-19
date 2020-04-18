@@ -15,7 +15,7 @@ authoritiesLst = [
     "E06000005", #"Darlington",
     "E06000047", #"County Durham",
     "E08000024", # Sunderland
-    "E09000022", # Lambeth (for comparison)
+    #"E09000022", # Lambeth (for comparison)
     #"Bournemouth, Christchurch and Poole"
 ]
 
@@ -50,7 +50,7 @@ def plotAuthorityData(df,authLst,chartFname="chart1.png",
 
     )    
 
-    dfDiffRoll.plot(ax=axes[2], y=authLst,
+    dfDiffRoll.plot(ax=axes[2], y=authLst, grid=True,
                     title="%s Rolling Average Confirmed Cases Per Day\nRaw Data" % rolling_window
 )
     axes[2].set_prop_cycle(None)
@@ -77,6 +77,10 @@ def plotNormalisedAuthorityData(df, authLst, chartFname="chart2.png",
     dfPop = loadPopulationData()
     for auth in authLst:
         seriesLst.append("%s_corr" % auth)
+    # Add normalised data for England for comparison.
+    seriesLst.append("%s_corr" % "E92000001")
+    print(seriesLst)
+
     dfRoll = df.rolling(rolling_window).mean()
     dfDiff = df.diff(axis=0)
     dfDiffRoll = dfDiff.rolling(rolling_window).mean()
@@ -99,6 +103,7 @@ def plotNormalisedAuthorityData(df, authLst, chartFname="chart2.png",
     axes[2].set_prop_cycle(None)
     #dfDiff.plot(y=seriesLst, grid=True, ax=axes[2], marker="+", style=".")
 
+    authLstExtended = authLst.append("E92000001")
     legendLst = getLegendLst(authLst)
     axes[0].legend(legendLst)
     axes[0].set_ylabel("Cumulative Cases")
@@ -116,6 +121,39 @@ def plotFit(df,authName, chartFname="chart3.png"):
     dfSlice = df[authName]
     print(dfSlice)
 
+
+def loadFile2(fname):
+    """ Reads a new style (16apr2020) coronavirus-cases.csv file
+    which is a long list of data, and converts it into a dataframe
+    with each date as a row, and columns for each authority/region in
+    the file.
+    """
+    print("loadFile2(%s)" % fname)
+    dflist = pd.read_csv(fname)
+
+    df = dflist.pivot(index="Specimen date",
+                      columns = "Area code",
+                      values = "Cumulative lab-confirmed cases")
+
+    # Convert index from object to datetime
+    df.index = pd.to_datetime(df.index)
+    #print(df.index)
+
+    # Fill the missing data with the previous day's number
+    #print(df[authoritiesLst[0]])
+    df = df.fillna(method='ffill', axis=0)
+    #print(df[authoritiesLst[0]])
+
+    dfPop = loadPopulationData()
+    for auth in df.columns:
+        pop = dfPop.query('Code=="%s"' % auth)['All ages']
+        corr = float(100000./pop)
+        df['%s_corr' % auth] = df[auth]*corr #.multiply(corr)
+
+
+
+    return df
+    
 def loadFile(fname):
     """ Reads the dasboard excel file fname and convert it into a dataframe
     which is returned.

@@ -97,7 +97,7 @@ def plotNormalisedAuthorityData(df, authLst, chartFname="chart2.png",
                 title="Confirmed Cases Per Day\nNormalised Data (cases per 100k population)"
     )    
 
-    dfDiffRoll.plot(ax=axes[2], y=seriesLst,
+    dfDiffRoll.plot(ax=axes[2], y=seriesLst, grid=True,
                         title="%s Rolling Average Confirmed Cases Per Day\nNormalised Data (cases per 100k population)" % rolling_window
 )
     axes[2].set_prop_cycle(None)

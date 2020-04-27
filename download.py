@@ -27,14 +27,81 @@ def getLatestDate(fname):
 
     return maxDate
 
+def downloadLatestData3(
+        urlStr = "https://coronavirus.data.gov.uk/downloads/csv", #'https://coronavirus.data.gov.uk/',
+        dataDirStr = "data",
+):
+    deathsFname = "coronavirus-deaths_latest.csv"
+    casesFname = "coronavirus-cases_latest.csv"
+    #downloadPath = "~/Downloads"
+    downloadPath = "."  # Headless chrome downloads to working directory
+
+    # If the files already exist in the downloads folder, delete them
+    casesPath = os.path.expanduser(os.path.join(downloadPath,casesFname))
+    deathsPath = os.path.expanduser(os.path.join(downloadPath,deathsFname))
+    if (os.path.exists(casesPath)):
+        os.remove(casesPath)
+    if (os.path.exists(deathsPath)):
+        os.remove(deathsPath)
+    
+
+    # Create the output data directory if necessary
+    dataDir = os.path.join(".",dataDirStr)
+    if (not os.path.exists(dataDir)):
+        print("Creating Data Directory %s" % dataDir)
+        os.makedirs(dataDir)
+    
+    # Download Cases Data
+    casesUrl = "%s/%s" % (urlStr,casesFname)
+    fileData = requests.get(casesUrl)
+    print("Saving data to %s" % casesPath)
+    open(casesPath, 'w').write(fileData.content)
+
+    # Download Deaths Data
+    deathsUrl = "%s/%s" % (urlStr,deathsFname)
+    fileData = requests.get(deathsUrl)
+    print("Saving data to %s" % deathsPath)
+    open(deathsPath, 'w').write(fileData.content)
+    
+
+    
+    print("Waiting for %s to download..." % casesPath)
+    while not os.path.exists(casesPath):
+        time.sleep(0.2)
+        sys.stderr.write(".")
+    sys.stdout.write("\nDownload Complete\n")
+    print("Waiting for %s to download..." % deathsPath)
+    while not os.path.exists(deathsPath):
+        time.sleep(0.2)
+        sys.stderr.write(".")
+    sys.stdout.write("\nDownload Complete\n")
+
+    # Copy to data directory
+    print()
+    print("Copying files to data folder %s" % dataDir)
+    shutil.copy(casesPath,os.path.join(dataDir,casesFname))
+    shutil.copy(deathsPath,os.path.join(dataDir,deathsFname))
+
+    casesDate = getLatestDate(os.path.join(dataDir,casesFname))
+    deathsDate = getLatestDate(os.path.join(dataDir,deathsFname))
+
+    casesDateFname = "%s_%s%s" % (os.path.splitext(casesFname)[0],
+                         casesDate.isoformat(),
+                         os.path.splitext(casesFname)[1])
+    deathsDateFname = "%s_%s%s" % (os.path.splitext(deathsFname)[0],
+                         deathsDate.isoformat(),
+                         os.path.splitext(deathsFname)[1])
+    print(casesDateFname, deathsDateFname)
+    shutil.copy(casesPath,os.path.join(dataDir,casesDateFname))
+    shutil.copy(deathsPath,os.path.join(dataDir,deathsDateFname))
 
 
 def downloadLatestData2(
         urlStr = 'https://coronavirus.data.gov.uk/',
         dataDirStr = "data",
 ):
-    deathsFname = "coronavirus-deaths.csv"
-    casesFname = "coronavirus-cases.csv"
+    deathsFname = "coronavirus-deaths_latest.csv"
+    casesFname = "coronavirus-cases_latest.csv"
     #downloadPath = "~/Downloads"
     downloadPath = "."  # Headless chrome downloads to working directory
 
@@ -143,5 +210,5 @@ def downloadLatestData(
 
 
 if (__name__ == "__main__"):
-    downloadLatestData2()
+    downloadLatestData3()
     #getLatestDate("data/coronavirus-cases.csv")

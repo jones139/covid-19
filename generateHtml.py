@@ -15,7 +15,7 @@ import analyse
 if (__name__ == "__main__"):
     print("html.main()")
     parser = argparse.ArgumentParser(description='generateHtml')
-    parser.add_argument('--inFile', default="data/coronavirus-cases.csv",
+    parser.add_argument('--inFile', default="data/coronavirus-cases_latest.csv",
                         help='input filename')
     parser.add_argument('--window', default="7d",
                         help='Window width for rolling average lines')
@@ -31,7 +31,7 @@ if (__name__ == "__main__"):
 
     if (not args['noDownload']):
         print("Downloading Latest Data")
-        download.downloadLatestData2()
+        download.downloadLatestData3()
     else:
         print("Not downloading data - attempting to use local data instead")
 

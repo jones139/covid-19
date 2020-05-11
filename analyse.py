@@ -4,6 +4,7 @@ import pandas as pd
 import matplotlib
 matplotlib.use('agg')
 import matplotlib.pyplot as plt
+import numpy as np
 
 latestDataFname = "latestData.xlsx"
 
@@ -130,7 +131,8 @@ def loadFile2(fname):
     """
     print("loadFile2(%s)" % fname)
     dflist = pd.read_csv(fname)
-
+    areaTypes = ['Upper tier local authority', 'Region', 'Nation']
+    dflist = dflist.loc[dflist['Area type'].isin(areaTypes)]
     df = dflist.pivot(index="Specimen date",
                       columns = "Area code",
                       values = "Cumulative lab-confirmed cases")

@@ -39,6 +39,9 @@ if (__name__ == "__main__"):
     df=analyse.loadFile2(inFname)
     dataDateStr=str((df.index[-1]).date())
 
+    #Drop last 3 days of data, because they tend to be incomplete so are misleading
+    df.drop(df.tail(3).index,inplace=True)
+
     analyse.plotAuthorityData(df,analyse.authoritiesLst,
                               chartFname="www/chart1.png",
                               rolling_window = windowStr

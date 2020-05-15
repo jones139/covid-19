@@ -101,7 +101,9 @@ def plotNormalisedAuthorityData(df, authLst, chartFname="chart2.png",
     dfDiffRoll.plot(ax=axes[2], y=seriesLst, grid=True,
                         title="%s Rolling Average Confirmed Cases Per Day\nNormalised Data (cases per 100k population)" % rolling_window
 )
+    # Highlight the first series
     axes[2].set_prop_cycle(None)
+    dfDiffRoll.plot(ax=axes[2], y=seriesLst[0], linewidth=4, grid=True)
     #dfDiff.plot(y=seriesLst, grid=True, ax=axes[2], marker="+", style=".")
 
     authLstExtended = authLst.append("E92000001")

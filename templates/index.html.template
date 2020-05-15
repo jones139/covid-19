@@ -4,7 +4,7 @@
   </head>
   <body>
     <h1>Teesside COVID-19 Tracker</h1>
-    <p>The charts below show the data published by <a href="https://www.arcgis.com/apps/opsdashboard/index.html#/ae5dda8f86814ae99dde905d2a9070ae">Public Health England</a> for individual local authority areas around Teesside.   We also include data for Lambeth as a comparison with a typical inner London authority to compare the progress of the epidemic in the North East compared to London</p>
+    <p>The charts below show the data published by <a href="https://www.arcgis.com/apps/opsdashboard/index.html#/ae5dda8f86814ae99dde905d2a9070ae">Public Health England</a> for individual local authority areas around Teesside.   We also include the data for England as a whole on the normalised plots to compare the progress of the epidemic in the North East compared to England as a whole.</p>
     <p>The <a href="#rawDataChart">first set of three charts</a> is just a representation of the historical data
       available on the Public Health England dashboard (their dashboard only
       shows a table, not a graph).  It shows the cuumulative cases, the calculated cases per day, and a rolling average of the cases per day data (To smooth out the noise)</p>
@@ -18,7 +18,7 @@
     <p>The last three days of data in the published dataset tend to be incomplete, so they are excluded from the graphs below to avoid giving a misleadingly good impression of the situation.  That is why the last date on the graph is not the same as the 'latest data' date at the bottom of this page.</p>
     <p>The data is processed using the
       <a href="https://pandas.pydata.org/">Pandas</a> data analysis library
-      using the scipts published
+      using the scripts published
       <a href="https://github.com/jones139/covid-19">here</a>.
       It should be updated every day automatically (if I have programmed my
       computer correctly.....)

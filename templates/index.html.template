@@ -24,9 +24,13 @@
       computer correctly.....)
       For any queries please email graham@openseizuredetector.org.uk</p>
     <h3 id="rawDataChart">Raw Data</h3>
-    <img src="chart1.png"/>
+    <img src="chart1_a.png"/>
+    <img src="chart1_b.png"/>
+    <img src="chart1_c.png"/>
     <h3 id="normalisedDataChart">Normalised Data</h3>
-    <img src="chart2.png"/>
+    <img src="chart2_a.png"/>
+    <img src="chart2_b.png"/>
+    <img src="chart2_c.png"/>
     <p>This page was generated at {{ data.pageDateStr }}.
       The latest data is from {{ data.dataDateStr }}.
     </p>

@@ -43,14 +43,16 @@ if (__name__ == "__main__"):
     df.drop(df.tail(3).index,inplace=True)
 
     analyse.plotAuthorityData(df,analyse.authoritiesLst,
-                              chartFname="www/chart1.png",
+                              chartFname="www/chart1",
                               rolling_window = windowStr
     )
     analyse.plotNormalisedAuthorityData(df,analyse.authoritiesLst,
-                                        chartFname="www/chart2.png",
+                                        chartFname="www/chart2",
                                         rolling_window = windowStr
     )
     #plotFit(df,"Hartlepool")
+
+    summary = analyse.getNormalisedSummary(df, rolling_window=windowStr, lag=0)
 
 
     # Get the most recent data, and filter it to only view the

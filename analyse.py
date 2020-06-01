@@ -28,48 +28,55 @@ def getLegendLst(authLst):
         legendLst.append(authName)
     return legendLst
 
-def plotAuthorityData(df,authLst,chartFname="chart1.png",
+def plotAuthorityData(df,authLst,chartFname="chart1",
                       rolling_window='5d'):
     """ Plots a graph of the data in df for authority authName 
     Plots a rolling average of the actual data as a line.  Default width
-       of rolling average window is 1 day, which amounts to the raw data."""
+       of rolling average window is 1 day, which amounts to the raw data.
+    Plots three separate graphs - cumulative cases, rate of cases and rolling
+    average rate as <chartFname>_a.png, chartFname_b.png and chartFname_c.png
+    """
     dfRoll = df.rolling(rolling_window).mean()
     #print(df.filter(authLst).tail(),dfRoll.filter(authLst).tail())
     dfDiff = df.diff(axis=0)
     dfDiffRoll = dfDiff.rolling(rolling_window).mean()
+    legendLst = getLegendLst(authLst)
 
-    fig, axes = plt.subplots(nrows=3, ncols=1,figsize=(7,12))
-    df.plot(ax=axes[0],
+    # Cumulative Graph
+    fig, axes = plt.subplots(nrows=1, ncols=1,figsize=(7,6))
+    df.plot(ax=axes,
             y=authLst,
             grid=True,
             title="Confirmed Cases\nRaw Data")
+    axes.legend(legendLst)
+    axes.set_ylabel("Cumulative Cases")
+    plt.tight_layout()
+    fig.savefig("%s_a.png" % chartFname)
+    plt.close(fig)
 
+    fig, axes = plt.subplots(nrows=1, ncols=1,figsize=(7,6))
     dfDiff.plot(y=authLst,
                 grid=True,
-                ax=axes[1],
+                ax=axes,
                 title="Confirmed Cases Per Day\nRaw Data"
+    )
+    axes.legend(legendLst)
+    axes.set_ylabel("Cases per Day")
+    plt.tight_layout()
+    fig.savefig("%s_b.png" % chartFname)
+    plt.close(fig)
 
-    )    
 
-    dfDiffRoll.plot(ax=axes[2], y=authLst, grid=True,
+    fig, axes = plt.subplots(nrows=1, ncols=1,figsize=(7,6))
+    dfDiffRoll.plot(ax=axes, y=authLst, grid=True,
                     title="%s Rolling Average Confirmed Cases Per Day\nRaw Data" % rolling_window
 )
-    axes[2].set_prop_cycle(None)
-    #dfDiff.plot(y=authLst,
-    #            grid=True,
-    #            ax=axes[2],
-    #            marker="+",
-    #            style=".",
-    #)
-    legendLst = getLegendLst(authLst)
-    axes[0].legend(legendLst)
-    axes[0].set_ylabel("Cumulative Cases")
-    axes[1].legend(legendLst)
-    axes[1].set_ylabel("Cases per Day")
-    axes[2].legend(legendLst)
-    axes[2].set_ylabel("Cases per Day")
+    axes.legend(legendLst)
+    axes.set_ylabel("Cases per Day (averaged)")
     plt.tight_layout()
-    fig.savefig(chartFname)
+    fig.savefig("%s_c.png" % chartFname)
+    plt.close(fig)
+
 
 
 def plotNormalisedAuthorityData(df, authLst, chartFname="chart2.png",
@@ -85,39 +92,62 @@ def plotNormalisedAuthorityData(df, authLst, chartFname="chart2.png",
     dfRoll = df.rolling(rolling_window).mean()
     dfDiff = df.diff(axis=0)
     dfDiffRoll = dfDiff.rolling(rolling_window).mean()
+    authLstExtended = authLst.append("E92000001")
+    legendLst = getLegendLst(authLst)
 
-    fig, axes = plt.subplots(nrows=3, ncols=1,figsize=(7,12))
-    df.plot(ax=axes[0],
+    fig, axes = plt.subplots(nrows=1, ncols=1,figsize=(7,6))
+    h1 = df.plot(ax=axes,
             y=seriesLst,
             grid=True,
             title="Confirmed Cases\nNormalised Data (cases per 100k population)")
+    # Highlight the first series
+    axes.set_prop_cycle(None)
+    h2 = df.plot(ax=axes, y=seriesLst[0], linewidth=4, grid=True)
 
+    axes.legend(legendLst)
+    axes.set_ylabel("Cumulative Cases")
+    fig.savefig("%s_a.png" % chartFname)
+    plt.close(fig)
+
+    fig, axes = plt.subplots(nrows=1, ncols=1,figsize=(7,6))
     dfDiff.plot(y=seriesLst,
                 grid=True,
-                ax=axes[1],
+                ax=axes,
                 title="Confirmed Cases Per Day\nNormalised Data (cases per 100k population)"
-    )    
+    )
+    # Highlight the first series
+    axes.set_prop_cycle(None)
+    dfDiff.plot(ax=axes, y=seriesLst[0], linewidth=4, grid=True)
 
-    dfDiffRoll.plot(ax=axes[2], y=seriesLst, grid=True,
+    axes.legend(legendLst)
+    axes.set_ylabel("Cases per Day")
+    fig.savefig("%s_b.png" % chartFname)
+    plt.close(fig)
+
+    fig, axes = plt.subplots(nrows=1, ncols=1,figsize=(7,6))
+    dfDiffRoll.plot(ax=axes, y=seriesLst, grid=True,
                         title="%s Rolling Average Confirmed Cases Per Day\nNormalised Data (cases per 100k population)" % rolling_window
 )
     # Highlight the first series
-    axes[2].set_prop_cycle(None)
-    dfDiffRoll.plot(ax=axes[2], y=seriesLst[0], linewidth=4, grid=True)
-    #dfDiff.plot(y=seriesLst, grid=True, ax=axes[2], marker="+", style=".")
-
-    authLstExtended = authLst.append("E92000001")
-    legendLst = getLegendLst(authLst)
-    axes[0].legend(legendLst)
-    axes[0].set_ylabel("Cumulative Cases")
-    axes[1].legend(legendLst)
-    axes[1].set_ylabel("Cases per Day")
-    axes[2].legend(legendLst)
-    axes[2].set_ylabel("Cases per Day")
-    plt.tight_layout()
-    fig.savefig(chartFname)
+    axes.set_prop_cycle(None)
+    dfDiffRoll.plot(ax=axes, y=seriesLst[0], linewidth=4, grid=True)
+    axes.legend(legendLst)
+    fig.savefig("%s_c.png" % chartFname)
+    plt.close(fig)
 
 
+def getNormalisedSummary(df,rolling_window='5d',lag=3):
+    """Return a list of tuples of authority, normalised cases and normalised rate.   returns the data for curent date -lag days (because the most recent data
+is incompletes so should not be used).
+    """
+    dfRoll = df.rolling(rolling_window).mean()
+    dfDiff = df.diff(axis=0)
+    dfDiffRoll = dfDiff.rolling(rolling_window).mean()
+
+    currDiff = dfDiffRoll.iloc[-1*(lag+1)]
+    print(currDiff)
+    
+    
 def plotFit(df,authName, chartFname="chart3.png"):
     """ plots data for a single authority with a simple exponential fit for comparison"""
     print("plotFit - authName=%s" % authName)

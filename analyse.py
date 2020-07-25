@@ -10,17 +10,17 @@ latestDataFname = "coronavirus-cases_latest.csv"
 
 authoritiesLst = [
     "E06000001", #"Hartlepool",
-#    "E06000002", #"Middlesbrough",
-#    "E06000003", #"Redcar and Cleveland",
-#    "E06000004", #"Stockton-on-Tees",
-#    "E06000005", #"Darlington",
-#    "E06000047", #"County Durham",
-#    "E08000024", # Sunderland,
-    "E06000016", # Leicester,
-    "E08000032", # Bradford,
-    "E08000005", # Rochdale,
-    "E06000009", # Blackpool,
-    "E08000018", # Rotherham
+    "E06000002", #"Middlesbrough",
+    "E06000003", #"Redcar and Cleveland",
+    "E06000004", #"Stockton-on-Tees",
+    "E06000005", #"Darlington",
+    "E06000047", #"County Durham",
+    "E08000024", # Sunderland,
+#    "E06000016", # Leicester,
+#    "E08000032", # Bradford,
+#    "E08000005", # Rochdale,
+#    "E06000009", # Blackpool,
+#    "E08000018", # Rotherham
     #"E09000022", # Lambeth (for comparison)
     #"Bournemouth, Christchurch and Poole"
 ]

@@ -35,14 +35,29 @@ if (__name__ == "__main__"):
     else:
         print("Not downloading data - attempting to use local data instead")
 
-    ca = analyse.CovidAnalysis(inFname)
+    ca = analyse.CovidAnalysis(inFname, dropDays=3)
     df = ca.getRawData()
-    #df=analyse.loadFile2(inFname)
     dataDateStr = str((df.index[-1]).date())
 
-    #Drop last 3 days of data, because they tend to be incomplete so are misleading
-    df.drop(df.tail(3).index, inplace=True)
+    summary = ca.getRankedData(normalised=True, rolling_window='7d', lag=0)
+    top10List = summary[0:10]['code'].tolist()
+    print("Top 10=", summary)
 
+    top10Summary = []
+    for i in range(0, 10):
+        top10Summary.append({
+            'Authority': summary.index[i],
+            'Rate': summary.iloc[i, 0]
+            })
+
+    print(top10Summary)
+
+    ca.plotAuthorityData(top10List,
+                         cumulative=False,
+                         normalised=True,
+                         rollingWindow='7d',
+                         chartFname="www/chart3_c.png")
+    
     ca.plotAuthorityData(analyse.authoritiesLst,
                          cumulative=True,
                          normalised=False,
@@ -74,34 +89,26 @@ if (__name__ == "__main__"):
                          rollingWindow='7d',
                          chartFname="www/chart2_c.png")
 
-    summary = ca.getRankedData(normalised=True, rolling_window='7d', lag=0)
-    print("Summary=", summary)
-
-
-    # Get the most recent data, and filter it to only view the
-    # corrected values for each authority.
-    #dfCurrent = df.iloc[-1,:]
-    #print(dfCurrent.sort_values().filter(like='_corr', axis=0))
-
 
     env = jinja2.Environment(
         loader=jinja2.FileSystemLoader(
-            os.path.join(os.path.dirname(__file__),'templates/')
+            os.path.join(os.path.dirname(__file__), 'templates/')
         ))
 
     template = env.get_template('index.html.template')
 
-    outfile = open(os.path.join(os.path.dirname(__file__),'www/index.html'),
-                   'w')
+    outfile = open(os.path.join(os.path.dirname(__file__),
+                                'www/index.html'), 'w')
     outfile.write(template.render(data={
-        'pageDateStr' : (datetime.datetime.now()).strftime("%Y-%m-%d %H:%M"),
-        'dataDateStr' : dataDateStr
+        'top10': top10Summary,
+        'pageDateStr': (datetime.datetime.now()).strftime("%Y-%m-%d %H:%M"),
+        'dataDateStr': dataDateStr
     }))
     outfile.close()
         
     if (not args['noUpload']):
         print("Uploading to web site")
-        os.system(os.path.join(os.path.dirname(__file__),"upload.sh"))
+        os.system(os.path.join(os.path.dirname(__file__), "upload.sh"))
     else:
         print("Not uploading files to web site")
         

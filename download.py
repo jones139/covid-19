@@ -55,13 +55,13 @@ def downloadLatestData3(
     casesUrl = "%s/%s" % (urlStr,casesFname)
     fileData = requests.get(casesUrl)
     print("Saving data to %s" % casesPath)
-    open(casesPath, 'w').write(fileData.content)
+    open(casesPath, 'w').write(fileData.content.decode())
 
     # Download Deaths Data
     deathsUrl = "%s/%s" % (urlStr,deathsFname)
     fileData = requests.get(deathsUrl)
     print("Saving data to %s" % deathsPath)
-    open(deathsPath, 'w').write(fileData.content)
+    open(deathsPath, 'w').write(fileData.content.decode())
     
 
     

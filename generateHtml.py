@@ -35,24 +35,47 @@ if (__name__ == "__main__"):
     else:
         print("Not downloading data - attempting to use local data instead")
 
-
-    df=analyse.loadFile2(inFname)
-    dataDateStr=str((df.index[-1]).date())
+    ca = analyse.CovidAnalysis(inFname)
+    df = ca.getRawData()
+    #df=analyse.loadFile2(inFname)
+    dataDateStr = str((df.index[-1]).date())
 
     #Drop last 3 days of data, because they tend to be incomplete so are misleading
-    df.drop(df.tail(3).index,inplace=True)
+    df.drop(df.tail(3).index, inplace=True)
 
-    analyse.plotAuthorityData(df,analyse.authoritiesLst,
-                              chartFname="www/chart1",
-                              rolling_window = windowStr
-    )
-    analyse.plotNormalisedAuthorityData(df,analyse.authoritiesLst,
-                                        chartFname="www/chart2",
-                                        rolling_window = windowStr
-    )
-    #plotFit(df,"Hartlepool")
+    ca.plotAuthorityData(analyse.authoritiesLst,
+                         cumulative=True,
+                         normalised=False,
+                         rollingWindow=None,
+                         chartFname="www/chart1_a.png")
+    ca.plotAuthorityData(analyse.authoritiesLst,
+                         cumulative=False,
+                         normalised=False,
+                         rollingWindow=None,
+                         chartFname="www/chart1_b.png")
+    ca.plotAuthorityData(analyse.authoritiesLst,
+                         cumulative=False,
+                         normalised=False,
+                         rollingWindow='7d',
+                         chartFname="www/chart1_c.png")
+    ca.plotAuthorityData(analyse.authoritiesLst,
+                         cumulative=True,
+                         normalised=True,
+                         rollingWindow=None,
+                         chartFname="www/chart2_a.png")
+    ca.plotAuthorityData(analyse.authoritiesLst,
+                         cumulative=False,
+                         normalised=True,
+                         rollingWindow=None,
+                         chartFname="www/chart2_b.png")
+    ca.plotAuthorityData(analyse.authoritiesLst,
+                         cumulative=False,
+                         normalised=True,
+                         rollingWindow='7d',
+                         chartFname="www/chart2_c.png")
 
-    summary = analyse.getNormalisedSummary(df, rolling_window=windowStr, lag=0)
+    summary = ca.getRankedData(normalised=True, rolling_window='7d', lag=0)
+    print("Summary=", summary)
 
 
     # Get the most recent data, and filter it to only view the

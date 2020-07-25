@@ -6,219 +6,179 @@ matplotlib.use('agg')
 import matplotlib.pyplot as plt
 import numpy as np
 
-latestDataFname = "latestData.xlsx"
+latestDataFname = "coronavirus-cases_latest.csv"
 
 authoritiesLst = [
     "E06000001", #"Hartlepool",
-    "E06000002", #"Middlesbrough",
-    "E06000003", #"Redcar and Cleveland",
-    "E06000004", #"Stockton-on-Tees",
-    "E06000005", #"Darlington",
-    "E06000047", #"County Durham",
-    "E08000024", # Sunderland
+#    "E06000002", #"Middlesbrough",
+#    "E06000003", #"Redcar and Cleveland",
+#    "E06000004", #"Stockton-on-Tees",
+#    "E06000005", #"Darlington",
+#    "E06000047", #"County Durham",
+#    "E08000024", # Sunderland,
+    "E06000016", # Leicester,
+    "E08000032", # Bradford,
+    "E08000005", # Rochdale,
+    "E06000009", # Blackpool,
+    "E08000018", # Rotherham
     #"E09000022", # Lambeth (for comparison)
     #"Bournemouth, Christchurch and Poole"
 ]
 
-def getLegendLst(authLst):
-    legendLst = []
-    dfPop = loadPopulationData()
-    for auth in authLst:
-        authName = str(dfPop.query('Code=="%s"' % auth)['Name'].values[0])
-        legendLst.append(authName)
-    return legendLst
 
-def plotAuthorityData(df,authLst,chartFname="chart1",
-                      rolling_window='5d'):
-    """ Plots a graph of the data in df for authority authName 
-    Plots a rolling average of the actual data as a line.  Default width
-       of rolling average window is 1 day, which amounts to the raw data.
-    Plots three separate graphs - cumulative cases, rate of cases and rolling
-    average rate as <chartFname>_a.png, chartFname_b.png and chartFname_c.png
-    """
-    dfRoll = df.rolling(rolling_window).mean()
-    #print(df.filter(authLst).tail(),dfRoll.filter(authLst).tail())
-    dfDiff = df.diff(axis=0)
-    dfDiffRoll = dfDiff.rolling(rolling_window).mean()
-    legendLst = getLegendLst(authLst)
+class PopData():
+    dfPop = None
+    def __init__(self):
+        df = pd.read_excel("populations.xlsx",
+                           sheet_name='MYE2-All', header=4)
+        self.dfPop =  df[['Code','Name','All ages']]
 
-    # Cumulative Graph
-    fig, axes = plt.subplots(nrows=1, ncols=1,figsize=(7,6))
-    df.plot(ax=axes,
-            y=authLst,
-            grid=True,
-            title="Confirmed Cases\nRaw Data")
-    axes.legend(legendLst)
-    axes.set_ylabel("Cumulative Cases")
-    plt.tight_layout()
-    fig.savefig("%s_a.png" % chartFname)
-    plt.close(fig)
+    def code2authName(self, authCode):
+        authName = str(
+            self.dfPop.query('Code=="%s"' % authCode)['Name'].values[0])
+        return(authName)
 
-    fig, axes = plt.subplots(nrows=1, ncols=1,figsize=(7,6))
-    dfDiff.plot(y=authLst,
+    def getPop(self, authCode):
+        pop = self.dfPop.query('Code=="%s"' % authCode)['All ages']
+        return(pop)
+
+
+class CovidAnalysis():
+    popData = None
+    dfRaw = None
+    dfNorm = None
+
+    def __init__(self, inFname, dropDays=2):
+        self.popData = PopData()
+        self.loadCsvFile(inFname, dropDays)
+
+
+    def loadCsvFile(self,fname, dropDays=2):
+        """ Reads a new style (16apr2020) coronavirus-cases.csv file
+        which is a long list of data, and converts it into a dataframe
+        with each date as a row, and columns for each authority/region in
+        the file.
+        """
+        print("loadCsvFile(%s)" % fname)
+        dflist = pd.read_csv(fname)
+        areaTypes = ['Upper tier local authority', 'Region', 'Nation']
+        dflist = dflist.loc[dflist['Area type'].isin(areaTypes)]
+        df = dflist.pivot(index="Specimen date",
+                          columns = "Area code",
+                          values = "Cumulative lab-confirmed cases")
+
+        # Convert index from object to datetime
+        df.index = pd.to_datetime(df.index)
+        #print(df.index)
+
+        # Fill the missing data with the previous day's number
+        #print(df[authoritiesLst[0]])
+        df = df.fillna(method='ffill', axis=0)
+        #print(df[authoritiesLst[0]])
+
+        #Drop last 'dropDays' days of data, because they tend to be incomplete so are misleading
+        df.drop(df.tail(dropDays).index, inplace=True)
+        
+        self.dfRaw = df.copy()
+
+        # Normalise the data by population
+        for auth in df.columns:
+            pop = self.popData.getPop(auth)
+            corr = float(100000./pop)
+            df[auth] = df[auth]*corr
+        self.dfNorm = df.copy()
+
+    def getRawData(self):
+        return self.dfRaw
+
+    def getNormData(self):
+        return self.dfNorm
+
+    def getLegendLst(self, authLst):
+        legendLst = []
+        for auth in authLst:
+            authName = self.popData.code2authName(auth)
+            legendLst.append(authName)
+        return legendLst
+
+
+    def getRankedData(self,normalised = True, rolling_window='5d',lag=3):
+        """Return a list of tuples of authority, normalised cases and 
+        normalised rate.   returns the data for curent date -lag days 
+        (because the most recent data is incompletes so should not be used).
+        """
+        if (normalised):
+            df = self.dfNorm
+        else:
+            df = self.dfRaw
+            
+        dfRoll = df.rolling(rolling_window).mean()
+        dfDiff = df.diff(axis=0)
+        dfDiffRoll = dfDiff.rolling(rolling_window).mean()
+
+        dfCurrDiff = dfDiffRoll.iloc[-1*(lag+1)].sort_values(ascending=False).to_frame()
+
+        authCodes = dfCurrDiff.index
+        authNames = self.getLegendLst(authCodes)
+        dfCurrDiff.index = authNames
+        dfCurrDiff['rank'] = dfCurrDiff.rank(ascending=False)
+        dfCurrDiff['code'] = authCodes
+        return(dfCurrDiff)
+
+    def plotAuthorityData(self, authLst,
+                          cumulative=False,
+                          normalised=False,
+                          rollingWindow=None,
+                          chartFname="chart2.png"):
+        seriesLst = authLst.copy()
+
+        # Either present raw cases or normalised cases per 100k population.
+        if normalised:
+            df = self.dfNorm
+            normStr = "per 100k population"
+            # Add normalised data for England for comparison.
+            seriesLst.append("E92000001")
+        else:
+            df = self.dfRaw
+            normStr = ""
+
+        # If we do not want cumulative data, calculate daily changes.
+        if not cumulative:
+            cumStr = "Cases Per Day"
+            df = df.diff(axis=0)
+        else:
+            cumStr = "Total Cases"
+            
+        # If we hae specified a rollingWindow value ('7d' etc)
+        # then calculate a rolling average over that window.
+        if rollingWindow is not None:
+            df = df.rolling(rollingWindow).mean()
+            rollStr = "%s rolling average" % rollingWindow
+        else:
+            rollStr = ""
+
+        titleStr = "Confirmed Covid-19 Cases %s\n%s %s" % (normStr, cumStr,rollStr)
+        yAxisStr = "%s, %s" % (cumStr, normStr)
+
+        print(seriesLst)
+        legendLst = self.getLegendLst(seriesLst)
+        print(legendLst)
+
+        fig, axes = plt.subplots(nrows=1, ncols=1, figsize=(7,6))
+        h1 = df.plot(ax=axes,
+                y=seriesLst,
                 grid=True,
-                ax=axes,
-                title="Confirmed Cases Per Day\nRaw Data"
-    )
-    axes.legend(legendLst)
-    axes.set_ylabel("Cases per Day")
-    plt.tight_layout()
-    fig.savefig("%s_b.png" % chartFname)
-    plt.close(fig)
+                title=titleStr)
+        # Highlight the first series
+        axes.set_prop_cycle(None)
+        df.plot(ax=axes, y=seriesLst[0], linewidth=4, grid=True)
 
+        axes.legend(legendLst)
+        axes.set_ylabel(yAxisStr)
+        fig.savefig(chartFname)
+        plt.close(fig)
+        print("plot complete")
 
-    fig, axes = plt.subplots(nrows=1, ncols=1,figsize=(7,6))
-    dfDiffRoll.plot(ax=axes, y=authLst, grid=True,
-                    title="%s Rolling Average Confirmed Cases Per Day\nRaw Data" % rolling_window
-)
-    axes.legend(legendLst)
-    axes.set_ylabel("Cases per Day (averaged)")
-    plt.tight_layout()
-    fig.savefig("%s_c.png" % chartFname)
-    plt.close(fig)
-
-
-
-def plotNormalisedAuthorityData(df, authLst, chartFname="chart2.png",
-                                rolling_window='5d'):
-    seriesLst = []
-    dfPop = loadPopulationData()
-    for auth in authLst:
-        seriesLst.append("%s_corr" % auth)
-    # Add normalised data for England for comparison.
-    seriesLst.append("%s_corr" % "E92000001")
-    print(seriesLst)
-
-    dfRoll = df.rolling(rolling_window).mean()
-    dfDiff = df.diff(axis=0)
-    dfDiffRoll = dfDiff.rolling(rolling_window).mean()
-    authLstExtended = authLst.append("E92000001")
-    legendLst = getLegendLst(authLst)
-
-    fig, axes = plt.subplots(nrows=1, ncols=1,figsize=(7,6))
-    h1 = df.plot(ax=axes,
-            y=seriesLst,
-            grid=True,
-            title="Confirmed Cases\nNormalised Data (cases per 100k population)")
-    # Highlight the first series
-    axes.set_prop_cycle(None)
-    h2 = df.plot(ax=axes, y=seriesLst[0], linewidth=4, grid=True)
-
-    axes.legend(legendLst)
-    axes.set_ylabel("Cumulative Cases")
-    fig.savefig("%s_a.png" % chartFname)
-    plt.close(fig)
-
-    fig, axes = plt.subplots(nrows=1, ncols=1,figsize=(7,6))
-    dfDiff.plot(y=seriesLst,
-                grid=True,
-                ax=axes,
-                title="Confirmed Cases Per Day\nNormalised Data (cases per 100k population)"
-    )
-    # Highlight the first series
-    axes.set_prop_cycle(None)
-    dfDiff.plot(ax=axes, y=seriesLst[0], linewidth=4, grid=True)
-
-    axes.legend(legendLst)
-    axes.set_ylabel("Cases per Day")
-    fig.savefig("%s_b.png" % chartFname)
-    plt.close(fig)
-
-    fig, axes = plt.subplots(nrows=1, ncols=1,figsize=(7,6))
-    dfDiffRoll.plot(ax=axes, y=seriesLst, grid=True,
-                        title="%s Rolling Average Confirmed Cases Per Day\nNormalised Data (cases per 100k population)" % rolling_window
-)
-    # Highlight the first series
-    axes.set_prop_cycle(None)
-    dfDiffRoll.plot(ax=axes, y=seriesLst[0], linewidth=4, grid=True)
-    axes.legend(legendLst)
-    fig.savefig("%s_c.png" % chartFname)
-    plt.close(fig)
-
-
-def getNormalisedSummary(df,rolling_window='5d',lag=3):
-    """Return a list of tuples of authority, normalised cases and normalised rate.   returns the data for curent date -lag days (because the most recent data
-is incompletes so should not be used).
-    """
-    dfRoll = df.rolling(rolling_window).mean()
-    dfDiff = df.diff(axis=0)
-    dfDiffRoll = dfDiff.rolling(rolling_window).mean()
-
-    currDiff = dfDiffRoll.iloc[-1*(lag+1)]
-    print(currDiff)
-    
-    
-def plotFit(df,authName, chartFname="chart3.png"):
-    """ plots data for a single authority with a simple exponential fit for comparison"""
-    print("plotFit - authName=%s" % authName)
-    dfSlice = df[authName]
-    print(dfSlice)
-
-
-def loadFile2(fname):
-    """ Reads a new style (16apr2020) coronavirus-cases.csv file
-    which is a long list of data, and converts it into a dataframe
-    with each date as a row, and columns for each authority/region in
-    the file.
-    """
-    print("loadFile2(%s)" % fname)
-    dflist = pd.read_csv(fname)
-    areaTypes = ['Upper tier local authority', 'Region', 'Nation']
-    dflist = dflist.loc[dflist['Area type'].isin(areaTypes)]
-    df = dflist.pivot(index="Specimen date",
-                      columns = "Area code",
-                      values = "Cumulative lab-confirmed cases")
-
-    # Convert index from object to datetime
-    df.index = pd.to_datetime(df.index)
-    #print(df.index)
-
-    # Fill the missing data with the previous day's number
-    #print(df[authoritiesLst[0]])
-    df = df.fillna(method='ffill', axis=0)
-    #print(df[authoritiesLst[0]])
-
-    dfPop = loadPopulationData()
-    for auth in df.columns:
-        pop = dfPop.query('Code=="%s"' % auth)['All ages']
-        corr = float(100000./pop)
-        df['%s_corr' % auth] = df[auth]*corr #.multiply(corr)
-
-
-
-    return df
-    
-def loadFile(fname):
-    """ Reads the dasboard excel file fname and convert it into a dataframe
-    which is returned.
-    """
-    print("loadFile(%s)" % fname)
-    df = pd.read_excel(fname, sheet_name='UTLAs', header=7)
-    df=df.drop(columns=["Area Name",
-    #                    "NHS region",
-    #                    "Region (Government) "
-    ])
-    colNames = list(df.iloc[:,0]) # Authority Codes
-    dft = df.transpose()
-    dft.columns = colNames
-    dft=dft.drop(index=["Area Code"]) # Drop the first row which is authority names
-    dft=dft.drop(columns=["Unconfirmed"])
-
-    dfPop = loadPopulationData()
-    # Convert datatypes from 'object' to numeric values.
-    for auth in dft.columns:
-        pop = dfPop.query('Code=="%s"' % auth)['All ages']
-        corr = float(100000./pop)
-        dft['%s_corr' % auth] = dft[auth]*corr #.multiply(corr)
-
-    # Convert index from object to datetime
-    dft.index = pd.to_datetime(dft.index)
-    return dft
-
-def loadPopulationData():
-    df = pd.read_excel("populations.xlsx", sheet_name='MYE2-All', header=4)
-    return df[['Code','Name','All ages']]
-    
 
 if (__name__ == "__main__"):
     print("main()")
@@ -234,16 +194,24 @@ if (__name__ == "__main__"):
 
     print("inFname=%s" % inFname)
 
-    df=loadFile(inFname)
+    ca = CovidAnalysis(inFname)
 
-    plotAuthorityData(df,authoritiesLst)
-    plotNormalisedAuthorityData(df,authoritiesLst)
+    #df=loadFile(inFname)
+
+    #plotAuthorityData(df,authoritiesLst)
+    #plotNormalisedAuthorityData(df,authoritiesLst)
     #plotFit(df,"Hartlepool")
 
 
     # Get the most recent data, and filter it to only view the
     # corrected values for each authority.
-    dfCurrent = df.iloc[-1,:]
-    print(dfCurrent.sort_values().filter(like='_corr', axis=0))
+    #dfCurrentRaw = ca.dfRaw.iloc[-1,:]
+    #print(dfCurrentRaw.sort_values())
+    #dfCurrentNorm = ca.dfNorm.iloc[-1,:]
+    #print(dfCurrentNorm.sort_values())
 
     
+    print(ca.getRankedData(normalised=True, rolling_window='7d', lag=64))
+
+    ca.plotAuthorityData(authoritiesLst, cumulative=False, normalised=True, chartFname="tst.png")
+    print("__main__ complete")

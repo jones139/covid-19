@@ -56,7 +56,15 @@ if (__name__ == "__main__"):
                          cumulative=False,
                          normalised=True,
                          rollingWindow='7d',
+                         periodStr=None,
                          chartFname="www/chart3_c.png")
+    ca.plotAuthorityData(top10List,
+                         cumulative=False,
+                         normalised=True,
+                         rollingWindow='7d',
+                         periodStr='12w',
+                         chartFname="www/chart3_d.png")
+
     
     ca.plotAuthorityData(analyse.authoritiesLst,
                          cumulative=True,
@@ -89,7 +97,14 @@ if (__name__ == "__main__"):
                          rollingWindow='7d',
                          chartFname="www/chart2_c.png")
 
+    ca.plotAuthorityData(analyse.authoritiesLst,
+                         cumulative=False,
+                         normalised=True,
+                         rollingWindow='7d',
+                         periodStr='12w',
+                         chartFname="www/chart2_d.png")
 
+    
     env = jinja2.Environment(
         loader=jinja2.FileSystemLoader(
             os.path.join(os.path.dirname(__file__), 'templates/')

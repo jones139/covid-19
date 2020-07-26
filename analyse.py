@@ -49,6 +49,8 @@ class CovidAnalysis():
     dfNorm = None
 
     def __init__(self, inFname, dropDays=2):
+        #Fix problem with some axes labels being cut off the plots.
+        matplotlib.rcParams.update({'figure.autolayout': True})
         self.popData = PopData()
         self.loadCsvFile(inFname, dropDays)
 
@@ -129,6 +131,7 @@ class CovidAnalysis():
                           cumulative=False,
                           normalised=False,
                           rollingWindow=None,
+                          periodStr=None,
                           chartFname="chart2.png"):
         seriesLst = authLst.copy()
 
@@ -157,12 +160,15 @@ class CovidAnalysis():
         else:
             rollStr = ""
 
+        # Select only the requested data timeframe
+        if periodStr is not None:
+            df = df.last(periodStr)
+
+            
+        # Assemble the title, Y axis label and legend.
         titleStr = "Confirmed Covid-19 Cases %s\n%s %s" % (normStr, cumStr,rollStr)
         yAxisStr = "%s, %s" % (cumStr, normStr)
-
-        print(seriesLst)
         legendLst = self.getLegendLst(seriesLst)
-        print(legendLst)
 
         fig, axes = plt.subplots(nrows=1, ncols=1, figsize=(7,6))
         h1 = df.plot(ax=axes,
@@ -195,21 +201,6 @@ if (__name__ == "__main__"):
     print("inFname=%s" % inFname)
 
     ca = CovidAnalysis(inFname)
-
-    #df=loadFile(inFname)
-
-    #plotAuthorityData(df,authoritiesLst)
-    #plotNormalisedAuthorityData(df,authoritiesLst)
-    #plotFit(df,"Hartlepool")
-
-
-    # Get the most recent data, and filter it to only view the
-    # corrected values for each authority.
-    #dfCurrentRaw = ca.dfRaw.iloc[-1,:]
-    #print(dfCurrentRaw.sort_values())
-    #dfCurrentNorm = ca.dfNorm.iloc[-1,:]
-    #print(dfCurrentNorm.sort_values())
-
     
     print(ca.getRankedData(normalised=True, rolling_window='7d', lag=64))
 

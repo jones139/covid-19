@@ -51,8 +51,9 @@
     <img src="chart1_c.png"/>
     <h3 id="normalisedDataChart">Normalised Data</h3>
     <img src="chart2_a.png"/>
-    <img src="chart2_b.png"/>
+    <!--<img src="chart2_b.png"/>-->
     <img src="chart2_c.png"/>
+    <img src="chart2_d.png"/>
     <h3 id="top10Chart">Top 10 Authorities (based on current average cases per day, normalised)</h3>
     <table>
       <tr><th>Authority</th><th>Cases Per Day per 100k pop.</th></tr>
@@ -64,6 +65,7 @@
       {% endfor %}
     </table>
     <img src="chart3_c.png"/>
+    <img src="chart3_d.png"/>
     <p>This page was generated at {{ data.pageDateStr }}.
       The latest data is from {{ data.dataDateStr }}.
     </p>

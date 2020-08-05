@@ -53,6 +53,7 @@ class CovidAnalysis():
         matplotlib.rcParams.update({'figure.autolayout': True})
         self.popData = PopData()
         self.loadCsvFile(inFname, dropDays)
+        print("CovidAnalysis.__init__ complete.")
 
 
     def loadCsvFile(self,fname, dropDays=2):
@@ -63,7 +64,7 @@ class CovidAnalysis():
         """
         print("loadCsvFile(%s)" % fname)
         dflist = pd.read_csv(fname)
-        areaTypes = ['Upper tier local authority', 'Region', 'Nation']
+        areaTypes = ['utla', 'region', 'nation']
         dflist = dflist.loc[dflist['Area type'].isin(areaTypes)]
         df = dflist.pivot(index="Specimen date",
                           columns = "Area code",

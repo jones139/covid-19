@@ -11,8 +11,9 @@ from selenium import webdriver
 
 def getLatestDate(fname):
     # Look in the file to get the last data data in the file.
-    print("Extracting latest date from file")
+    print("Extracting latest date from file %s" % fname)
     df = pd.read_csv(fname)
+    print(df.columns)
     if ('Specimen date' in df.columns):
         df['Specimen date'] = pd.to_datetime(df['Specimen date'])
         maxDate=max(df['Specimen date']).date()
@@ -20,8 +21,8 @@ def getLatestDate(fname):
         df['Reporting date'] = pd.to_datetime(df['Reporting date'])
         maxDate=max(df['Reporting date']).date()
     else:
-        print("ERRROR - Can't find date column!!!")
-        exit(-1)
+        print("ERRROR - Can't find date column!!! - using todays date.")
+        maxDate = pd.to_datetime('today')
 
     print("maxDate=%s" % maxDate.isoformat())
 

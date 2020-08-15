@@ -64,7 +64,7 @@ class CovidAnalysis():
         """
         print("loadCsvFile(%s)" % fname)
         dflist = pd.read_csv(fname)
-        areaTypes = ['utla', 'region', 'nation']
+        areaTypes = ['ltla', 'region', 'nation']
         dflist = dflist.loc[dflist['Area type'].isin(areaTypes)]
         df = dflist.pivot(index="Specimen date",
                           columns = "Area code",

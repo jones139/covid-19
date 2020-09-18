@@ -3,6 +3,7 @@
 import os
 import datetime
 import argparse
+import shutil
 
 import pandas as pd
 import jinja2
@@ -39,15 +40,35 @@ if (__name__ == "__main__"):
     df = ca.getRawData()
     dataDateStr = str((df.index[-1]).date())
 
+    # Today's ranked list
     summary = ca.getRankedData(normalised=True, rolling_window='7d', lag=0)
+    # Last week's ranked list.
+    summary_prev = ca.getRankedData(normalised=True, rolling_window='7d', lag=7)
     top10List = summary[0:10]['code'].tolist()
     print("Top 10=", summary)
 
+    #summary_prev.sort_index(inplace=True)
+    #print("summary_prev")
+    #print(summary_prev)
+    #print(summary_prev['code']==summary['code'])
+
     top10Summary = []
-    for i in range(0, 10):
+    for i in range(0, len(summary.index)):
+        curPos = int(summary.iloc[i]['rank'])
+        prevPos = int(summary_prev.loc[summary_prev['code']==summary.iloc[i]['code']]['rank'].iloc[0])
+        iconName = "RightArrow.png"
+        if (curPos<prevPos):
+            iconName = "UpArrow.png"
+        if (curPos>prevPos):
+            iconName = "DownArrow.png"
+        
         top10Summary.append({
+            'Position': curPos,
+            'Position_prev': prevPos,
+            'Icon_name': iconName,
             'Authority': summary.index[i],
-            'Rate': summary.iloc[i, 0]
+            'Rate': summary.iloc[i, 0],
+            'Rate_weekly': summary.iloc[i, 0] * 7
             })
 
     print(top10Summary)
@@ -110,8 +131,8 @@ if (__name__ == "__main__"):
             os.path.join(os.path.dirname(__file__), 'templates/')
         ))
 
+    # Render main page
     template = env.get_template('index.html.template')
-
     outfile = open(os.path.join(os.path.dirname(__file__),
                                 'www/index.html'), 'w')
     outfile.write(template.render(data={
@@ -120,6 +141,25 @@ if (__name__ == "__main__"):
         'dataDateStr': dataDateStr
     }))
     outfile.close()
+
+    # Render All Authorities table
+    template = env.get_template('all_authorities_table.html.template')
+    outfile = open(os.path.join(os.path.dirname(__file__),
+                                'www/all_authorities_table.html'), 'w')
+    outfile.write(template.render(data={
+        'top10': top10Summary,
+        'pageDateStr': (datetime.datetime.now()).strftime("%Y-%m-%d %H:%M"),
+        'dataDateStr': dataDateStr
+    }))
+    outfile.close()
+
+
+    for iconFname in ['UpArrow.png', 'DownArrow.png', 'RightArrow.png']:
+        print(iconFname)
+        shutil.copyfile(os.path.join(os.path.dirname(__file__),
+                                     'templates',iconFname),
+                        os.path.join(os.path.dirname(__file__),
+                                     'www',iconFname))
         
     if (not args['noUpload']):
         print("Uploading to web site")

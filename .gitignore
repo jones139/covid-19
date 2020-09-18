@@ -1,3 +1,4 @@
+*~
 *.py~
 *.pyc
 data
@@ -6,3 +7,7 @@ populations.xlsx
 chart*.png
 index.html
 upload.sh
+coronavirus-cases_latest.csv
+coronavirus-deaths_latest.csv
+www
+*.log

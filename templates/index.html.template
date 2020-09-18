@@ -11,6 +11,9 @@
       vertical-align: top;
       text-align: center;
       }
+      td.alignleft {
+      text-align: left;
+      }
       .inline {
       display: inline-block;
       }
@@ -19,6 +22,10 @@
       }
       .highlight {
       background-color: yellow;
+      }
+      .icon {
+      width: 25px;
+      height: 25px;
       }
     </style>
 
@@ -56,14 +63,24 @@
     <img src="chart2_d.png"/>
     <h3 id="top10Chart">Top 10 Authorities (based on current average cases per day, normalised)</h3>
     <table>
-      <tr><th>Authority</th><th>Cases Per Day per 100k pop.</th></tr>
-      {% for authRec in data.top10 %}
       <tr>
-	<td>{{ authRec.Authority }}</td>
-	<td>{{ "{:.1f}".format(authRec.Rate) }}</td>
+	<th>Position<br/>(Last Week)</th>
+	<th>Authority</th>
+	<th>Cases Per Day per 100k pop.<br/>(per week)</th>
+      </tr>
+      {% for authRec in data.top10[:10] %}
+      <tr>
+	<td class="alignleft">
+	  {{ "{:.0f}".format(authRec.Position) }} 
+	  ( {{ "{:.0f}".format(authRec.Position_prev) }} )
+	  <img class="icon" src='{{ authRec.Icon_name }}'/>
+	</td>
+	<td class="alignleft">{{ authRec.Authority }}</td>
+	<td>{{ "{:.1f}".format(authRec.Rate) }} ({{ "{:.0f}".format(authRec.Rate_weekly) }})</td>
       </tr>
       {% endfor %}
     </table>
+    <a href="all_authorities_table.html">View Complete Table</a><br/>
     <img src="chart3_c.png"/>
     <img src="chart3_d.png"/>
     <p>This page was generated at {{ data.pageDateStr }}.

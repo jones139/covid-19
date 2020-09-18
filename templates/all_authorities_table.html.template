@@ -1,0 +1,59 @@
+<html>
+  <head>
+    <title>Teesside COVID-19 Tracker - Summary of All English Authorities</title>
+    <style>
+      div {
+      vertical-align: top;
+      }
+
+      table, th, td {
+      border: 1px solid black;
+      vertical-align: top;
+      text-align: center;
+      }
+      td.alignleft {
+      text-align: left;
+      }
+      .inline {
+      display: inline-block;
+      }
+      .warn {
+      color: red;
+      }
+      .highlight {
+      background-color: yellow;
+      }
+      .icon {
+      width: 25px;
+      height: 25px;
+      }
+    </style>
+
+  </head>
+  <body>
+    <h1>Teesside COVID-19 Tracker - Summary of All English Authorities</h1>
+
+    <h3 id="top10Chart">All Authorities (sorted on current average cases per day, normalised)</h3>
+    <table>
+      <tr>
+	<th>Position<br/>(Last Week)</th>
+	<th>Authority</th>
+	<th>Cases Per Day per 100k pop.<br/>(per week)</th>
+      </tr>
+      {% for authRec in data.top10 %}
+      <tr>
+	<td class="alignleft">
+	  {{ "{:.0f}".format(authRec.Position) }} 
+	  ( {{ "{:.0f}".format(authRec.Position_prev) }} )
+	  <img class="icon" src='{{ authRec.Icon_name }}'/>
+	</td>
+	<td class="alignleft">{{ authRec.Authority }}</td>
+	<td>{{ "{:.1f}".format(authRec.Rate) }} ({{ "{:.0f}".format(authRec.Rate_weekly) }})</td>
+      </tr>
+      {% endfor %}
+    </table>
+    <p>This page was generated at {{ data.pageDateStr }}.
+      The latest data is from {{ data.dataDateStr }}.
+    </p>
+  </body>
+</html>

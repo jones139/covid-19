@@ -12,6 +12,19 @@ import download
 import analyse
 
 
+familyAuthLst = [
+    "E06000001", #"Hartlepool",
+    "E06000003", #"Redcar and Cleveland",
+    "E06000005", #"Darlington",
+    "E06000058",    #"Bournemouth, Christchurch and Poole"
+    "E08000017", # Doncaster
+    "E08000032", # Bradford
+    "E07000112", # Folkestone and Hythe
+    "E07000203", # Mid Suffolk
+    "E07000178", # Oxford
+]
+
+
 
 if (__name__ == "__main__"):
     print("html.main()")
@@ -36,7 +49,7 @@ if (__name__ == "__main__"):
     else:
         print("Not downloading data - attempting to use local data instead")
 
-    ca = analyse.CovidAnalysis(inFname, dropDays=3)
+    ca = analyse.CovidAnalysis(inFname, dropDays=1)
     df = ca.getRawData()
     dataDateStr = str((df.index[-1]).date())
 
@@ -125,6 +138,19 @@ if (__name__ == "__main__"):
                          periodStr='12w',
                          chartFname="www/chart2_d.png")
 
+    ca.plotAuthorityData(familyAuthLst,
+                         cumulative=False,
+                         normalised=True,
+                         rollingWindow='7d',
+                         chartFname="www/chart4_a.png")
+
+    ca.plotAuthorityData(familyAuthLst,
+                         cumulative=False,
+                         normalised=True,
+                         rollingWindow='7d',
+                         periodStr='12w',
+                         chartFname="www/chart4_b.png")
+    
     
     env = jinja2.Environment(
         loader=jinja2.FileSystemLoader(
@@ -142,6 +168,19 @@ if (__name__ == "__main__"):
     }))
     outfile.close()
 
+    # Render Family Interest Page
+    template = env.get_template('family.html.template')
+    outfile = open(os.path.join(os.path.dirname(__file__),
+                                'www/family.html'), 'w')
+    outfile.write(template.render(data={
+        'top10': top10Summary,
+        'pageDateStr': (datetime.datetime.now()).strftime("%Y-%m-%d %H:%M"),
+        'dataDateStr': dataDateStr
+    }))
+    outfile.close()
+
+
+    
     # Render All Authorities table
     template = env.get_template('all_authorities_table.html.template')
     outfile = open(os.path.join(os.path.dirname(__file__),

@@ -1,0 +1,44 @@
+<html>
+  <head>
+    <title>Teesside COVID-19 Tracker</title>
+    <style>
+      div {
+      vertical-align: top;
+      }
+
+      table, th, td {
+      border: 1px solid black;
+      vertical-align: top;
+      text-align: center;
+      }
+      td.alignleft {
+      text-align: left;
+      }
+      .inline {
+      display: inline-block;
+      }
+      .warn {
+      color: red;
+      }
+      .highlight {
+      background-color: yellow;
+      }
+      .icon {
+      width: 25px;
+      height: 25px;
+      }
+    </style>
+
+  </head>
+  <body>
+    <h1>Teesside COVID-19 Tracker - Family Interest Areas</h1>
+    <a href="index.html">Main Page</a>
+    <h3 id="normalisedDataChart">Normalised Data</h3>
+    <img src="chart4_a.png"/>
+    <img src="chart4_b.png"/>
+
+    <p>This page was generated at {{ data.pageDateStr }}.
+      The latest data is from {{ data.dataDateStr }}.
+    </p>
+  </body>
+</html>

@@ -18,7 +18,7 @@ familyAuthLst = [
     "E06000005", #"Darlington",
     "E06000058",    #"Bournemouth, Christchurch and Poole"
     "E08000017", # Doncaster
-    "E08000032", # Bradford
+    "E08000034", # Kirklees
     "E07000112", # Folkestone and Hythe
     "E07000203", # Mid Suffolk
     "E07000178", # Oxford
@@ -45,7 +45,7 @@ if (__name__ == "__main__"):
 
     if (not args['noDownload']):
         print("Downloading Latest Data")
-        download.downloadLatestData3()
+        download.downloadLatestData4()
     else:
         print("Not downloading data - attempting to use local data instead")
 
@@ -202,7 +202,12 @@ if (__name__ == "__main__"):
         
     if (not args['noUpload']):
         print("Uploading to web site")
-        os.system(os.path.join(os.path.dirname(__file__), "upload.sh"))
+        #print("__file__=",__file__)
+        #print("os.path.dirname(os.path.abspath(__file__))=",os.path.dirname(os.path.abspath(__file__)))
+        exePath = os.path.join(os.path.dirname(os.path.abspath(__file__)), "upload.sh")
+        #exePath="/home/graham/covid-19/upload.sh"
+        print(exePath)
+        os.system(exePath)
     else:
         print("Not uploading files to web site")
         

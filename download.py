@@ -28,6 +28,49 @@ def getLatestDate(fname):
 
     return maxDate
 
+
+def downloadLatestData4(dataDirStr = "data"):
+    """ Uses the API to download, utla, ltla and nation data, then merge them so it is similar to the
+    data in coronavirus-cases_latest.csv, which no longer contans UTLA data (28apr2021).
+    """
+
+    urlStr = "https://api.coronavirus.data.gov.uk/v2/data?areaType=%s&metric=newCasesBySpecimenDate&metric=cumCasesBySpecimenDate&format=csv"
+    #urlStr = "https://api.coronavirus.data.gov.uk/v2/data?areaType=%s&metric=newCasesBySpecimenDate&format=csv"
+    print("downloading %s...." % (urlStr % "ltla"))
+    dfLtla = pd.read_csv(urlStr % "ltla")
+    dfUtla = pd.read_csv(urlStr % "utla")
+    dfRegion = pd.read_csv(urlStr % "region")
+    dfNation = pd.read_csv(urlStr % "nation")
+    df = pd.concat([dfNation, dfRegion, dfUtla, dfLtla], axis=0, ignore_index=True)
+    df.rename(columns={
+        'date':'Specimen date',
+        'newCasesBySpecimenDate':'Daily lab-confirmed cases',
+        'cumCasesBySpecimenDate':'Cumulative lab-confirmed cases',
+        'areaType':'Area type',
+        'areaName':'Area name',
+        'areaCode':'Area code',
+    },inplace=True)
+    print(df)
+
+    casesFname = "coronavirus-cases_latest.csv"
+
+    # Create the output data directory if necessary
+    dataDir = os.path.join(".",dataDirStr)
+    if (not os.path.exists(dataDir)):
+        print("Creating Data Directory %s" % dataDir)
+        os.makedirs(dataDir)
+    
+    df.to_csv(os.path.join(".",casesFname), index=False)
+    df.to_csv(os.path.join(dataDir,casesFname), index=False)
+
+    casesDate = getLatestDate(os.path.join(dataDir,casesFname))
+    casesDateFname = "%s_%s%s" % (os.path.splitext(casesFname)[0],
+                         casesDate.isoformat(),
+                         os.path.splitext(casesFname)[1])
+
+    df.to_csv(os.path.join(dataDir,casesDateFname), index=False)
+            
+ 
 def downloadLatestData3(
         urlStr = "https://coronavirus.data.gov.uk/downloads/csv", #'https://coronavirus.data.gov.uk/',
         dataDirStr = "data",
@@ -211,5 +254,6 @@ def downloadLatestData(
 
 
 if (__name__ == "__main__"):
-    downloadLatestData3()
+    downloadLatestData4()
+    #downloadLatestData3()
     #getLatestDate("data/coronavirus-cases.csv")

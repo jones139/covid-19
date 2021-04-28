@@ -15,6 +15,7 @@ Current functionality is:
        to help interpret if the trend is slowing or not.
   * cleverer analysis to follow......
   
+The output is generated daily and is available here: https://openseizuredetector.org.uk/static/covid-19/index.html
   
 Any comments please email grahamjones139@gmail.com
 

@@ -187,6 +187,67 @@ class CovidAnalysis():
         print("plot complete")
 
 
+    def plotNationalDeathsData(self, authLst,
+                          cumulative=False,
+                          normalised=False,
+                          rollingWindow=None,
+                          periodStr=None,
+                          chartFname="chart2.png"):
+        seriesLst = authLst.copy()
+
+        # Either present raw cases or normalised cases per 100k population.
+        if normalised:
+            df = self.dfNorm
+            normStr = "per 100k population"
+            # Add normalised data for England for comparison.
+            seriesLst.append("E92000001")
+        else:
+            df = self.dfRaw
+            normStr = ""
+
+        # If we do not want cumulative data, calculate daily changes.
+        if not cumulative:
+            cumStr = "Cases Per Day"
+            df = df.diff(axis=0)
+        else:
+            cumStr = "Total Cases"
+            
+        # If we hae specified a rollingWindow value ('7d' etc)
+        # then calculate a rolling average over that window.
+        if rollingWindow is not None:
+            df = df.rolling(rollingWindow).mean()
+            rollStr = "%s rolling average" % rollingWindow
+        else:
+            rollStr = ""
+
+        # Select only the requested data timeframe
+        if periodStr is not None:
+            df = df.last(periodStr)
+
+            
+        # Assemble the title, Y axis label and legend.
+        titleStr = "Confirmed Covid-19 Cases %s\n%s %s" % (normStr, cumStr,rollStr)
+        yAxisStr = "%s, %s" % (cumStr, normStr)
+        legendLst = self.getLegendLst(seriesLst)
+
+        fig, axes = plt.subplots(nrows=1, ncols=1, figsize=(7,6))
+        h1 = df.plot(ax=axes,
+                y=seriesLst,
+                grid=True,
+                title=titleStr)
+        # Highlight the first series
+        axes.set_prop_cycle(None)
+        df.plot(ax=axes, y=seriesLst[0], linewidth=4, grid=True)
+
+        axes.legend(legendLst)
+        axes.set_ylabel(yAxisStr)
+        fig.savefig(chartFname)
+        plt.close(fig)
+        print("plot complete")
+
+
+
+        
 if (__name__ == "__main__"):
     print("main()")
     parser = argparse.ArgumentParser(description='analyse_history')

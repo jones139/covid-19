@@ -45,7 +45,7 @@ if (__name__ == "__main__"):
 
     if (not args['noDownload']):
         print("Downloading Latest Data")
-        download.downloadLatestData4()
+        download.downloadLatestData()
     else:
         print("Not downloading data - attempting to use local data instead")
 

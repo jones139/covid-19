@@ -50,6 +50,29 @@ if (__name__ == "__main__"):
         print("Not downloading data - attempting to use local data instead")
 
     ca = analyse.CovidAnalysis(inFname, dropDays=1)
+
+    #dfDeaths = ca.getRawDeathsData()
+    #print("dfDeathsCases=",dfDeathsCases)
+    #print("dfDeaths=",dfDeaths)
+
+    #dfDeathsRaw = dfDeathsCases.join(dfDeaths,rsuffix="_deaths")
+    #print("dfDeathsRaw=",dfDeathsRaw[['E92000001','E92000001_deaths']])
+
+    caseOffset = 14
+    ca.plotNationalDeathsData(
+        caseOffsetDays=caseOffset,
+        normalised=True,
+        rollingWindow="7d",
+        periodStr="15M",
+        chartFname="national_norm_7d")
+    ca.plotNationalDeathsData(
+        caseOffsetDays=caseOffset,
+        normalised=False,
+        rollingWindow="7d",
+        periodStr="15M",
+        chartFname="national_raw_7d")
+    exit(0)
+    
     df = ca.getRawData()
     dataDateStr = str((df.index[-1]).date())
 
@@ -85,6 +108,7 @@ if (__name__ == "__main__"):
             })
 
     print(top10Summary)
+
 
     ca.plotAuthorityData(top10List,
                          cumulative=False,

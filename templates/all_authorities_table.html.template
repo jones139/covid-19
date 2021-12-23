@@ -32,7 +32,7 @@
   </head>
   <body>
     <h1>Teesside COVID-19 Tracker - Summary of All English Authorities</h1>
-    <a href="index.html">Main Page</a>
+    <a href="index.html">Main Page</a> | <a href="national.html">National View</a> | <a href="family.html">Family Interest Authorities</a>
 
     <h3 id="top10Chart">All Authorities (sorted on current average cases per day, normalised)</h3>
     <table>

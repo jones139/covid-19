@@ -105,21 +105,29 @@ class CovidAnalysis():
         dfDailyDeaths = dflist.pivot(index="Specimen date",
                           columns = "Area code",
                           values = "newDeaths28DaysByDeathDate")
-
+        dfDailyAdmissions = dflist.pivot(index="Specimen date",
+                          columns = "Area code",
+                          values = "newAdmissions")
+        
         # Convert index from object to datetime
         dfDailyCases.index = pd.to_datetime(dfDailyCases.index)
         dfDailyDeaths.index = pd.to_datetime(dfDailyDeaths.index)
+        dfDailyAdmissions.index = pd.to_datetime(dfDailyAdmissions.index)
 
         # Fill the missing data with the previous day's number
         dfDailyCases = dfDailyCases.fillna(method='ffill', axis=0)
         dfDailyDeaths = dfDailyDeaths.fillna(method='ffill', axis=0)
+        dfDailyAdmissions = dfDailyAdmissions.fillna(method='ffill', axis=0)
+
 
         #Drop last 'dropDays' days of data, because they tend to be incomplete so are misleading
         dfDailyCases.drop(dfDailyCases.tail(dropDays).index, inplace=True)
         dfDailyDeaths.drop(dfDailyDeaths.tail(dropDays).index, inplace=True)
+        dfDailyAdmissions.drop(dfDailyAdmissions.tail(dropDays).index, inplace=True)
         
         self.dfDailyCasesRaw = dfDailyCases.copy()
         self.dfDailyDeathsRaw = dfDailyDeaths.copy()
+        self.dfDailyAdmissionsRaw = dfDailyAdmissions.copy()
 
         # Normalise the data by population
         for auth in self.dfDailyCasesRaw.columns:
@@ -133,8 +141,29 @@ class CovidAnalysis():
             dfDailyDeaths[auth] = dfDailyDeaths[auth]*corr
         self.dfDailyDeathsNorm = dfDailyDeaths.copy()
 
+        for auth in dfDailyAdmissions.columns:
+            pop = self.popData.getPop(auth)
+            corr = float(100000./pop)
+            dfDailyAdmissions[auth] = dfDailyAdmissions[auth]*corr
+        self.dfDailyAdmissionsNorm = dfDailyAdmissions.copy()
+
+        # Rename admissions columns
+        newColumns = []
+        for auth in self.dfDailyAdmissionsNorm.columns:
+            newColumns.append("%s_admissions" % auth)        
+        self.dfDailyAdmissionsNorm.columns = newColumns
+        self.dfDailyAdmissionsRaw.columns = newColumns
+
+        
+        print("Merging dataframes into raw and normalised dataframes")
+        print("RAW")
         self.dfDailyDeathsRaw = self.dfDailyDeathsRaw.join(self.dfDailyCasesRaw, lsuffix="_deaths", rsuffix="_cases")
+        #print(self.dfDailyDeathsRaw, self.dfDailyAdmissionsRaw)
+        self.dfDailyDeathsRaw = self.dfDailyDeathsRaw.join(self.dfDailyAdmissionsRaw, rsuffix="test", lsuffix="_adm")
+        print(self.dfDailyDeathsRaw,self.dfDailyDeathsRaw.columns)
+        print("NORM")
         self.dfDailyDeathsNorm = self.dfDailyDeathsNorm.join(self.dfDailyCasesNorm, lsuffix="_deaths", rsuffix="_cases")
+        self.dfDailyDeathsNorm = self.dfDailyDeathsNorm.join(self.dfDailyAdmissionsNorm, lsuffix="", rsuffix="_admissions")
 
 
     def getRawDeathsData(self):
@@ -239,7 +268,8 @@ class CovidAnalysis():
 
         
     def plotNationalDeathsData(self,
-                               caseOffsetDays=7,
+                               caseOffsetDays_Deaths=14,
+                               caseOffsetDays_Admissions=7,
                                normalised=False,
                                rollingWindow=None,
                                periodStr=None,
@@ -257,9 +287,11 @@ class CovidAnalysis():
         # Create lists of the series names in the dataframe
         casesSeriesLst = []
         deathsSeriesLst = []
+        admissionsSeriesLst = []
         for auth in seriesLst:
             casesSeriesLst.append("%s_cases" % auth)
             deathsSeriesLst.append("%s_deaths" % auth)
+            admissionsSeriesLst.append("%s_admissions" % auth)
             
         
         # Either present raw cases or normalised cases per 100k population.
@@ -270,8 +302,10 @@ class CovidAnalysis():
             df = self.dfDailyDeathsRaw
             normStr = ""
 
+        print(df.columns)
 
-        # If we hae specified a rollingWindow value ('7d' etc)
+
+        # If we have specified a rollingWindow value ('7d' etc)
         # then calculate a rolling average over that window.
         if rollingWindow is not None:
             df = df.rolling(rollingWindow).mean()
@@ -304,7 +338,7 @@ class CovidAnalysis():
         titleStr = "Covid-19 Related Deaths %s\n%s %s" % (normStr, "Deaths Per Day",rollStr)
         yAxisStr = "%s, %s" % ("Deaths (within 28 days of +ve test) per day", normStr)
         legendLst = self.getLegendLst(seriesLst)
-        print("Plotting deaths data: ",deathsSeriesLst)
+        #print("Plotting deaths data: ",deathsSeriesLst)
         fig, axes = plt.subplots(nrows=1, ncols=1, figsize=(7,6))
         h1 = df.plot(ax=axes,
                      y=deathsSeriesLst,
@@ -316,32 +350,66 @@ class CovidAnalysis():
         fig.savefig("%s_deaths.png" % chartFname)
         plt.close(fig)
 
-        # Now Plot Deaths per Case (with time shift of cases)
-        dfOffset = df.shift(periods=caseOffsetDays)
-        #print(df,dfOffset)
-        dfRatio = pd.DataFrame()
-        for n in range(0,len(deathsSeriesLst)):
-            auth = seriesLst[n]
-            print(n,auth)
-            dfRatio[auth] = df["%s_deaths" % auth] / dfOffset["%s_cases" % auth]
-        print(dfRatio)
         # Assemble the title, Y axis label and legend for deaths chart.
-        titleStr = "Covid-19 Related Deaths per Case %s\n%s %s" % (normStr, "Deaths Per Day",rollStr)
-        yAxisStr = "%s, %s" % ("Deaths (within 28 days of +ve test) per case per day", normStr)
+        titleStr = "Covid-19 Related Hospital Admissions %s\n%s %s" % (normStr, "Admissions Per Day",rollStr)
+        yAxisStr = "%s, %s" % ("Admissions per day", normStr)
         legendLst = self.getLegendLst(seriesLst)
-        print("Plotting deaths ratio data: ",deathsSeriesLst)
+        #print("Plotting deaths data: ",deathsSeriesLst)
         fig, axes = plt.subplots(nrows=1, ncols=1, figsize=(7,6))
-        h1 = dfRatio.plot(ax=axes,
-                     y=seriesLst,
+        h1 = df.plot(ax=axes,
+                     y=admissionsSeriesLst,
                      grid=True,
                      title=titleStr)
 
         axes.legend(legendLst)
         axes.set_ylabel(yAxisStr)
-        fig.savefig("%s_ratio.png" % chartFname)
+        fig.savefig("%s_admissions.png" % chartFname)
         plt.close(fig)
 
 
+        # Now Plot Deaths per Case (with time shift of cases)
+        dfOffset = df.shift(periods=caseOffsetDays_Deaths)
+        #print(df,dfOffset)
+        dfRatio = pd.DataFrame()
+        for n in range(0,len(deathsSeriesLst)):
+            auth = seriesLst[n]
+            dfRatio[auth] = df["%s_deaths" % auth] / dfOffset["%s_cases" % auth]
+        # Assemble the title, Y axis label and legend for deaths chart.
+        titleStr = "Covid-19 Related Deaths per Case %s\n%s %s" % (normStr, "Deaths Per Day",rollStr)
+        yAxisStr = "%s, %s" % ("Deaths (within 28 days of +ve test) per case per day", normStr)
+        legendLst = self.getLegendLst(seriesLst)
+        fig, axes = plt.subplots(nrows=1, ncols=1, figsize=(7,6))
+        h1 = dfRatio.plot(ax=axes,
+                     y=seriesLst,
+                     grid=True,
+                     title=titleStr)
+        axes.legend(legendLst)
+        axes.set_ylabel(yAxisStr)
+        fig.savefig("%s_deaths_ratio.png" % chartFname)
+        plt.close(fig)
+
+
+        # Now Plot Hospital Admissions per Case (with time shift of cases)
+        dfOffset = df.shift(periods=caseOffsetDays_Admissions)
+        dfRatio = pd.DataFrame()
+        for n in range(0,len(seriesLst)):
+            auth = seriesLst[n]
+            dfRatio[auth] = df["%s_admissions" % auth] / dfOffset["%s_cases" % auth]
+        # Assemble the title, Y axis label and legend for deaths chart.
+        titleStr = "Covid-19 Related Hospital Admissions per Case %s\n%s %s" % (normStr, "Admissions Per Day",rollStr)
+        yAxisStr = "%s, %s" % ("Admissions per case per day", normStr)
+        legendLst = self.getLegendLst(seriesLst)
+        fig, axes = plt.subplots(nrows=1, ncols=1, figsize=(7,6))
+        h1 = dfRatio.plot(ax=axes,
+                     y=seriesLst,
+                     grid=True,
+                     title=titleStr)
+        axes.legend(legendLst)
+        axes.set_ylabel(yAxisStr)
+        fig.savefig("%s_admissions_ratio.png" % chartFname)
+        plt.close(fig)
+
+        
         print("plot complete")
 
 

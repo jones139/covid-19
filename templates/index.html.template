@@ -32,7 +32,7 @@
   </head>
   <body>
     <h1>Teesside COVID-19 Tracker</h1>
-    <a href="#rawDataChart">Raw Data</a> | <a href="#normalisedDataChart">Normalised Data</a> | <a href="#top10Chart">Top 10 Authorities</a> | <a href="family.html">Family Interest Authorities</a>
+    <a href="#rawDataChart">Raw Data</a> | <a href="#normalisedDataChart">Normalised Data</a> | <a href="#top10Chart">Top 10 Authorities</a> | <a href="national.html">National View</a> | <a href="family.html">Family Interest Authorities</a>
     <p>The charts below show the data published by <a href="https://www.arcgis.com/apps/opsdashboard/index.html#/ae5dda8f86814ae99dde905d2a9070ae">Public Health England</a> for individual local authority areas around Teesside.   We also include the data for England as a whole on the normalised plots to compare the progress of the epidemic in the North East compared to England as a whole.</p>
     <p>The <a href="#rawDataChart">first set of three charts</a> is just a representation of the historical data
       available on the Public Health England dashboard (their dashboard only

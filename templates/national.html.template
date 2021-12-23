@@ -1,0 +1,57 @@
+<html>
+  <head>
+    <title>Teesside COVID-19 Tracker - National View</title>
+    <style>
+      div {
+      vertical-align: top;
+      }
+
+      table, th, td {
+      border: 1px solid black;
+      vertical-align: top;
+      text-align: center;
+      }
+      td.alignleft {
+      text-align: left;
+      }
+      .inline {
+      display: inline-block;
+      }
+      .warn {
+      color: red;
+      }
+      .highlight {
+      background-color: yellow;
+      }
+      .icon {
+      width: 25px;
+      height: 25px;
+      }
+    </style>
+
+  </head>
+  <body>
+    <h1>Teesside COVID-19 Tracker - National View</h1>
+    <a href="index.html">Main Page</a> | <a href="#rawDataChart">Raw Data</a> | <a href="#normalisedDataChart">Normalised Data</a> |
+    <h3>Notes</h3>
+    When comparing cases to hospital admissions or deaths, we use the case rate 7 days previously for hospital admissions, and 14 days previously for deaths.  THis is to recognise the delay between someone testing positive and becoming seriously ill.
+    The exact time offset to use between hospital admissions or deaths and cases is not obvious - the odd shape of the deaths ratio graph in January 2021 is probably because the value we have used is not correct.
+    <h3 id="rawDataChart">Raw Data</h3>
+    <img src="national_raw_7d_cases.png"/>
+    <img src="national_raw_7d_admissions.png"/>
+    <img src="national_raw_7d_deaths.png"/>
+    <img src="national_raw_7d_admissions_ratio.png"/>
+    <img src="national_raw_7d_deaths_ratio.png"/>
+    <h3 id="normalisedDataChart">Normalised Data</h3>
+    <img src="national_norm_7d_cases.png"/>
+    <img src="national_norm_7d_admissions.png"/>
+    <img src="national_norm_7d_deaths.png"/>
+    <img src="national_norm_7d_admissions_ratio.png"/>
+    <img src="national_norm_7d_deaths_ratio.png"/>
+
+
+    <p>This page was generated at {{ data.pageDateStr }}.
+      The latest data is from {{ data.dataDateStr }}.
+    </p>
+  </body>
+</html>

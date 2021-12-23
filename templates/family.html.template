@@ -32,7 +32,7 @@
   </head>
   <body>
     <h1>Teesside COVID-19 Tracker - Family Interest Areas</h1>
-    <a href="index.html">Main Page</a>
+    <a href="#rawDataChart">Raw Data</a> | <a href="#normalisedDataChart">Normalised Data</a> | <a href="#top10Chart">Top 10 Authorities</a> | <a href="national.html">National View</a> | <a href="family.html">Family Interest Authorities</a>
     <h3 id="normalisedDataChart">Normalised Data</h3>
     <img src="chart4_a.png"/>
     <img src="chart4_b.png"/>

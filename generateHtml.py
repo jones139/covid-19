@@ -58,20 +58,22 @@ if (__name__ == "__main__"):
     #dfDeathsRaw = dfDeathsCases.join(dfDeaths,rsuffix="_deaths")
     #print("dfDeathsRaw=",dfDeathsRaw[['E92000001','E92000001_deaths']])
 
-    caseOffset = 14
+    caseOffset_Deaths = 14
+    caseOffset_Admissions = 7
     ca.plotNationalDeathsData(
-        caseOffsetDays=caseOffset,
+        caseOffsetDays_Deaths=caseOffset_Deaths,
+        caseOffsetDays_Admissions=caseOffset_Admissions,
         normalised=True,
         rollingWindow="7d",
         periodStr="15M",
-        chartFname="national_norm_7d")
+        chartFname="www/national_norm_7d")
     ca.plotNationalDeathsData(
-        caseOffsetDays=caseOffset,
+        caseOffsetDays_Deaths=caseOffset_Deaths,
+        caseOffsetDays_Admissions=caseOffset_Admissions,
         normalised=False,
         rollingWindow="7d",
         periodStr="15M",
-        chartFname="national_raw_7d")
-    exit(0)
+        chartFname="www/national_raw_7d")
     
     df = ca.getRawData()
     dataDateStr = str((df.index[-1]).date())
@@ -203,6 +205,16 @@ if (__name__ == "__main__"):
     }))
     outfile.close()
 
+    # Render National View Page
+    template = env.get_template('national.html.template')
+    outfile = open(os.path.join(os.path.dirname(__file__),
+                                'www/national.html'), 'w')
+    outfile.write(template.render(data={
+        'top10': top10Summary,
+        'pageDateStr': (datetime.datetime.now()).strftime("%Y-%m-%d %H:%M"),
+        'dataDateStr': dataDateStr
+    }))
+    outfile.close()
 
     
     # Render All Authorities table
